@@ -1,5 +1,4 @@
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <3ds.h>
@@ -43,7 +42,7 @@ int main()
 		gspWaitForVBlank();
 		gfxSwapBuffers();
 
-		aptSetChainloader(0x0004800554574C44, 0); // Bootstrap Title ID
+		aptSetChainloader(0x0004800546574452, 0); // Bootstrap Title ID
 		break;
 	}
 

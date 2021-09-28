@@ -31,7 +31,7 @@ bootstrap.cia: bootstrap.dsi
 
 #---------------------------------------------------------------------------------
 bootstrap.dsi : checkarm7 checkarm9
-	ndstool -c $@ -7 $(TARGET).arm7.elf -9 $(TARGET).arm9i.elf -b $(CURDIR)/bootstrap.bmp "CTR-NDSForwarder;TWLNAND Booter;lifehackerhansol" -g TWLD 01 "TWLNFWDR-LHS" -u 00030005 -z 80040000
+	ndstool -c $@ -7 $(TARGET).arm7.elf -9 $(TARGET).arm9i.elf -b $(CURDIR)/bootstrap.bmp "CTR-NDSForwarder;TWLNAND Booter;lifehackerhansol" -g FWDR 01 "TWLNFWDR-LHS" -u 00030005 -z 80040000
 
 #---------------------------------------------------------------------------------
 checkarm7:
