@@ -21,7 +21,7 @@ Current issues:
   - how do you program DS homebrew
 
 Credits:
-  - [devkitPro](https://devkitpro.org) for their toolchain and the app-launcher 3DS example code
+  - [devkitPro](https://devkitpro.org) for their toolchain, the app-launcher 3DS example code, and BootStrap
   - [RocketRobz](https://github.com/RocketRobz) for the forwarder source code
   - [Universal-Team members](https://github.com/Universal-Team) for dealing with my terrible questions
   - probably more to come soon because this code isn't even complete yet
