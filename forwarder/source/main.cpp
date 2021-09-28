@@ -43,7 +43,7 @@ int main()
 		gspWaitForVBlank();
 		gfxSwapBuffers();
 
-		aptSetChainloader(0x0004800554574C44, 0); // TWLNFWD Title ID
+		aptSetChainloader(0x0004800554574C44, 0); // Bootstrap Title ID
 		break;
 	}
 

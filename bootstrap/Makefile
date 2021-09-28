@@ -30,15 +30,15 @@ bootstrap.cia: bootstrap.dsi
 	make_cia --srl=bootstrap.dsi
 
 #---------------------------------------------------------------------------------
-bootstrap.dsi : $(TARGET).arm7.elf $(TARGET).arm9i.elf
-	ndstool -c $(TARGET).nds -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf -b $(CURDIR)/bootstrap.bmp "CTR-NDSForwarder;TWLNAND Booter;lifehackerhansol" -g TWLD 01 "TWLNFWDR-LHS" -u 00030005 -z 80040000
+bootstrap.dsi : checkarm7 checkarm9
+	ndstool -c $@ -7 $(TARGET).arm7.elf -9 $(TARGET).arm9i.elf -b $(CURDIR)/bootstrap.bmp "CTR-NDSForwarder;TWLNAND Booter;lifehackerhansol" -g TWLD 01 "TWLNFWDR-LHS" -u 00030005 -z 80040000
 
 #---------------------------------------------------------------------------------
-$(TARGET).arm7.elf:
+checkarm7:
 	$(MAKE) -C arm7
 
 #---------------------------------------------------------------------------------
-$(TARGET).arm9i.elf:
+checkarm9:
 	$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------

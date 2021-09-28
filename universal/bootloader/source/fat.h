@@ -1,6 +1,15 @@
 /*-----------------------------------------------------------------
-
- Copyright (C) 2010  Dave "WinterMute" Murphy
+ fat.h
+ 
+ NDS MP
+ GBAMP NDS Firmware Hack Version 2.12
+ An NDS aware firmware patch for the GBA Movie Player.
+ By Michael Chisholm (Chishm)
+ 
+ Filesystem code based on GBAMP_CF.c by Chishm (me).
+ 
+License:
+ Copyright (C) 2005  Michael "Chishm" Chisholm
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,21 +25,22 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+ If you use this code, please give due credit and email me about your
+ project at chishm@hotmail.com
 ------------------------------------------------------------------*/
 
-#include <nds.h>
-#include <fat.h>
+#ifndef FAT_H
+#define FAT_H
 
-#include <stdio.h>
+#include <nds/ndstypes.h>
 
-#include "nds_loader_arm9.h"
+#define CLUSTER_FREE	0x00000000
+#define	CLUSTER_EOF		0x0FFFFFFF
+#define CLUSTER_FIRST	0x00000002
 
-int main( int argc, char **argv) {
-	if (fatInitDefault()) {
-		runNdsFile("/_nds/CTR-NDSForwarder/sdcard.nds", 0, NULL);
-	} else {
-		consoleDemoInit();
-		iprintf("FAT init failed!\n");
-	}
-	while(1) swiWaitForVBlank();
-}
+bool FAT_InitFiles (bool initCard);
+u32 getBootFileCluster (const char* bootName);
+u32 fileRead (char* buffer, u32 cluster, u32 startOffset, u32 length);
+u32 FAT_ClustToSect (u32 cluster);
+
+#endif // FAT_H

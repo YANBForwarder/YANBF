@@ -1,6 +1,7 @@
 /*-----------------------------------------------------------------
-
- Copyright (C) 2010  Dave "WinterMute" Murphy
+ Copyright (C) 2005 - 2010
+	Michael "Chishm" Chisholm
+	Dave "WinterMute" Murphy
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -18,19 +19,24 @@
 
 ------------------------------------------------------------------*/
 
-#include <nds.h>
-#include <fat.h>
+#ifndef NDS_LOADER_ARM9_H
+#define NDS_LOADER_ARM9_H
 
-#include <stdio.h>
 
-#include "nds_loader_arm9.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int main( int argc, char **argv) {
-	if (fatInitDefault()) {
-		runNdsFile("/_nds/CTR-NDSForwarder/sdcard.nds", 0, NULL);
-	} else {
-		consoleDemoInit();
-		iprintf("FAT init failed!\n");
-	}
-	while(1) swiWaitForVBlank();
+#define LOAD_DEFAULT_NDS 0
+
+int runNds (const void* loader, u32 loaderSize, u32 cluster, bool initDisc, bool dldiPatchNds, int argc, const char** argv);
+
+int runNdsFile (const char* filename, int argc, const char** argv);
+
+bool installBootStub(bool havedsiSD);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // NDS_LOADER_ARM7_H

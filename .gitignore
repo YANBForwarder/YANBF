@@ -1,1 +1,15 @@
 .DS_Store
+*.elf
+*.nds
+*.dsi
+*.3dsx
+*.cia
+*.smdh
+dist
+forwarder/build
+bootstrap/arm7/build
+bootstrap/arm9/build
+sd/arm7/build
+sd/arm9/build
+universal/data
+universal/bootloader/build

@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------
 
- Copyright (C) 2010  Dave "WinterMute" Murphy
+ Copyright (C) 2005  Michael "Chishm" Chisholm
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,21 +16,30 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+ If you use this code, please give due credit and email me about your
+ project at chishm@hotmail.com
 ------------------------------------------------------------------*/
 
-#include <nds.h>
-#include <fat.h>
+#ifndef CARD_H
+#define CARD_H
 
-#include <stdio.h>
+#include "disc_io.h"
+#include "io_dldi.h"
 
-#include "nds_loader_arm9.h"
-
-int main( int argc, char **argv) {
-	if (fatInitDefault()) {
-		runNdsFile("/_nds/CTR-NDSForwarder/sdcard.nds", 0, NULL);
-	} else {
-		consoleDemoInit();
-		iprintf("FAT init failed!\n");
-	}
-	while(1) swiWaitForVBlank();
+static inline bool CARD_StartUp (void) {
+	return _io_dldi.fn_startup();
 }
+
+static inline bool CARD_IsInserted (void) {
+	return _io_dldi.fn_isInserted();
+}
+
+static inline bool CARD_ReadSector (u32 sector, void *buffer) {
+	return _io_dldi.fn_readSectors(sector, 1, buffer);
+}
+
+static inline bool CARD_ReadSectors (u32 sector, int count, void *buffer) {
+	return _io_dldi.fn_readSectors(sector, count, buffer);
+}
+
+#endif // CARD_H
