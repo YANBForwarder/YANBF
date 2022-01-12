@@ -8,9 +8,6 @@ from struct import unpack
 from binascii import hexlify
 from bannergif import bannergif
 
-iconsize = (48, 48)
-bannersize = (256, 128)
-
 parser = argparse.ArgumentParser(description="CTR-NDSForwarder Generator")
 parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
 parser.add_argument("-o", "--output", metavar="output.cia", type=str, nargs=1, help="output CIA")
@@ -27,9 +24,10 @@ if err != 0:
 else:
     print("Resizing icon...")
     im = Image.open('output.gif')
-    im = im.resize(iconsize)
+    im.putpalette(b"\xFF\xFF\xFF" + im.palette.palette[3:])
+    im = im.convert('RGB')
+    im = im.resize((48, 48), resample=Image.LINEAR)
     im.save('output.png')
-
 
     # get banner title
     print("Extracting game metadata...")
@@ -170,3 +168,4 @@ else:
     makeromrun = subprocess.Popen(makeromarg, shell=True)
     makeromrun.wait()
     print("CIA generated.")
+    exit()

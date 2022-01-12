@@ -195,9 +195,6 @@ else
 # main targets
 #---------------------------------------------------------------------------------
 
-$(OUTPUT).cia	:	$(OUTPUT).3dsx
-	cd $(TOPDIR) && ./makerom -elf forwarder.elf -rsf build-cia.rsf -DAPP_ROMFS="$(TOPDIR)/$(ROMFS)" -f cia -o forwarder.cia
-
 $(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS)
 
 $(OFILES_SOURCES) : $(HFILES)

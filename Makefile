@@ -20,7 +20,6 @@ dist:	forwarder bootstrap sd
 	@mkdir -p dist/cia
 	@mkdir -p dist/generator/data
 	@mkdir -p dist/generator/romfs
-	@mkdir -p dist/debug
 	@mkdir -p 'dist/for SD card root/_nds/CTR-NDSForwarder'
 
 	@cp -f forwarder/forwarder.* dist
@@ -30,7 +29,7 @@ dist:	forwarder bootstrap sd
 	@cp -f generator/bannergif.py dist/generator/bannergif.py
 	@cp -f generator/data/build-cia.rsf dist/generator/data/build-cia.rsf
 	@mv -f dist/forwarder.elf dist/generator/data/forwarder.elf
-	@mv -f dist/forwarder.* dist/debug/
+	@rm -f dist/forwarder.*
 	@cp -f README.md dist/README.md
 	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
 
