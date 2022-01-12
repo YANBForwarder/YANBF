@@ -17,13 +17,13 @@ include $(DEVKITARM)/ds_rules
 all:	forwarder bootstrap dist
 
 dist:	forwarder bootstrap sd
-	@mkdir -p dist/cia
 	@mkdir -p dist/generator/data
 	@mkdir -p dist/generator/romfs
 	@mkdir -p 'dist/for SD card root/_nds/CTR-NDSForwarder'
+	@mkdir -p 'dist/for SD card root/cias'
 
 	@cp -f forwarder/forwarder.* dist
-	@cp -f bootstrap/bootstrap.cia dist/cia/bootstrap.cia
+	@cp -f bootstrap/bootstrap.cia 'dist/for SD card root/cias/bootstrap.cia'
 	@cp -f sd/sdcard.nds 'dist/for SD card root/_nds/CTR-NDSForwarder/sdcard.nds'
 	@cp -f generator/generator.py dist/generator/generator.py
 	@cp -f generator/bannergif.py dist/generator/bannergif.py

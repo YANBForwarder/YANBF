@@ -15,6 +15,10 @@ parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, h
 
 args = parser.parse_args()
 
+cmdarg = ""
+if os.name != 'nt':
+    cmdarg = "./"
+
 path = args.input[0]
 err = bannergif(path)
 print("Extracting icon...")
@@ -60,7 +64,7 @@ else:
     rom.close()
 
     print("Creating SMDH...")
-    bannertoolarg = 'bannertool makesmdh -i "output.png" '
+    bannertoolarg = f'{cmdarg}bannertool makesmdh -i "output.png" '
     bannertoolarg += f'-s "{eng_title[0]}" -js "{jpn_title[0]}" -es "{eng_title[0]}" -fs "{fra_title[0]}" -gs "{ger_title[0]}" -is "{ita_title[0]}" -ss "{spa_title[0]}" '
     if len(jpn_title) == 3:
         haspublisher = True
@@ -135,7 +139,7 @@ else:
     new_image.save('data/banner.png', 'PNG')
 
     print("Creating banner...")
-    bannertoolarg = "bannertool makebanner -i data/banner.png -a data/dsboot.wav -o banner.bin"
+    bannertoolarg = f"{cmdarg}bannertool makebanner -i data/banner.png -a data/dsboot.wav -o banner.bin"
     bannertoolrun = subprocess.Popen(bannertoolarg, shell=True)
     bannertoolrun.wait()
 
@@ -162,7 +166,7 @@ else:
     gamecodehex = f"0x{hexlify(gamecode.encode()).decode()}"
     gamecodehex = gamecodehex[:-3]
     print("Running makerom...")
-    makeromarg = "makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner banner.bin -icon output.smdh -DAPP_ROMFS=romfs -major 1 -minor 0 -micro 0 -DAPP_VERSION_MAJOR=1 "
+    makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner banner.bin -icon output.smdh -DAPP_ROMFS=romfs -major 1 -minor 0 -micro 0 -DAPP_VERSION_MAJOR=1 "
     makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "
     makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{eng_title[0]}" -DAPP_UNIQUE_ID={gamecodehex}'
     makeromrun = subprocess.Popen(makeromarg, shell=True)
