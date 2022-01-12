@@ -117,8 +117,8 @@ else:
         r = requests.get(f"https://art.gametdb.com/ds/coverM/{ba_region}/{gamecode}.jpg")
         if r.status_code != 200:
             print("Cannot find box art for game. Are you connected to the internet?")
-            print("Checking for existing boxart...")
-        boxart = open('data/boxart.png', 'wb')
+            exit()
+        boxart = open('data/boxart.jpg', 'wb')
         boxart.write(r.content)
         boxart.close()
     else:
@@ -126,7 +126,7 @@ else:
             print(f"{args.boxart[0]} does not exist. Is your argument correct?")
             exit()
     print("Resizing box art...")
-    banner = Image.open(args.boxart[0] if args.boxart else 'data/boxart.png')
+    banner = Image.open(args.boxart[0] if args.boxart else 'data/boxart.jpg')
     width, height = banner.size
     new_height = 128
     new_width = new_height * width // height
