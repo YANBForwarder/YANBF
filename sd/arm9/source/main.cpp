@@ -329,7 +329,14 @@ int main(int argc, char **argv) {
 		consoleModel = fifoGetValue32(FIFO_USER_05) == 0xD2 ? 1 : 2; // 1: Panda DSi, 2: 3DS/2DS
 	}
 
-	if (fatInitDefault()) {
+	if (!fatInitDefault()) {
+		// Subscreen as a console
+		videoSetModeSub(MODE_0_2D);
+		vramSetBankH(VRAM_H_SUB_BG);
+		consoleInit(NULL, 0, BgType_Text4bpp, BgSize_T_256x256, 15, 0, false, true);	
+
+		iprintf ("fatinitDefault failed!\n");
+	} else {
 		FILE* pathtxt = fopen("/_nds/CTR-NDSForwarder/path.txt", "r");
 		char path[255];
 		if(fgets(path, 255, pathtxt)==NULL) {
@@ -337,7 +344,7 @@ int main(int argc, char **argv) {
 			iprintf("Failed. Unknown\n");
 		} else if (access(path, F_OK) != 0) {
 			consoleDemoInit();
-			iprintf("Not found:\n%s\n\n", argv[1]);
+			iprintf("Not found:\n%s\n\n", path);
 			iprintf("Please recreate the forwarder\n");
 			iprintf("with the correct ROM path.\n");
 		} else {
@@ -632,13 +639,6 @@ int main(int argc, char **argv) {
 			}
 		}
 		}
-	} else {
-		// Subscreen as a console
-		videoSetModeSub(MODE_0_2D);
-		vramSetBankH(VRAM_H_SUB_BG);
-		consoleInit(NULL, 0, BgType_Text4bpp, BgSize_T_256x256, 15, 0, false, true);	
-
-		iprintf ("fatinitDefault failed!\n");
 	}
 
 	iprintf ("\n");		

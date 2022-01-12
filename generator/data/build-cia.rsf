@@ -7,7 +7,7 @@ RomFs:
   RootPath: $(APP_ROMFS)
 
 TitleInfo:
-  Category                : $(APP_CATEGORY)
+  Category                : Application
   UniqueId                : $(APP_UNIQUE_ID)
 
 Option:
@@ -67,8 +67,8 @@ AccessControlInfo:
    - UseCardSpi
 
   # Process Settings
-  MemoryType                    : $(APP_MEMORY_TYPE) # Application/System/Base
-  SystemMode                    : $(APP_SYSTEM_MODE) # 64MB(Default)/96MB/80MB/72MB/32MB
+  MemoryType                    : Application # Application/System/Base
+  SystemMode                    : 64MB # 64MB(Default)/96MB/80MB/72MB/32MB
   IdealProcessor                : 0
   AffinityMask                  : 1
   Priority                      : 16
@@ -85,8 +85,8 @@ AccessControlInfo:
   SpecialMemoryArrange          : true
 
   # New3DS Exclusive Process Settings
-  SystemModeExt                 : $(APP_SYSTEM_MODE_EXT) # Legacy(Default)/124MB/178MB  Legacy:Use Old3DS SystemMode
-  CpuSpeed                      : $(APP_CPU_SPEED) # 268MHz(Default)/804MHz
+  SystemModeExt                 : Legacy # Legacy(Default)/124MB/178MB  Legacy:Use Old3DS SystemMode
+  CpuSpeed                      : 268MHz # 268MHz(Default)/804MHz
   EnableL2Cache                 : false # false(default)/true
   CanAccessCore2                : true 
 

@@ -1,10 +1,10 @@
 import argparse
 import subprocess
 import os
-import pathlib
 
 from PIL import Image
 from struct import unpack
+from binascii import hexlify
 from bannergif import bannergif
 
 iconsize = (48, 48)
@@ -17,15 +17,18 @@ args = parser.parse_args()
 
 path = args.input[0]
 err = bannergif(path)
+print("Extracting icon...")
 if err != 0:
     print("Failed to open ROM. Is the path valid?")
     exit()
 else:
+    print("Resizing icon...")
     im = Image.open('output.gif')
     im = im.resize(iconsize)
     im.save('output.png')
 
     # get banner title
+    print("Extracting game title...")
     rom = open(args.input[0], "rb")
     rom.seek(0x68, 0)
     banneraddrle = rom.read(4)
@@ -50,6 +53,7 @@ else:
         chn_title = None
     if kor_title[0][0] == "\uffff":
         kor_title = None
+    print("Creating SMDH...")
     bannertoolarg = 'bannertool makesmdh -i "output.png" '
     bannertoolarg += f'-s "{eng_title[0]}" -js "{jpn_title[0]}" -es "{eng_title[0]}" -fs "{fra_title[0]}" -gs "{ger_title[0]}" -is "{ita_title[0]}" -ss "{spa_title[0]}" '
     if len(jpn_title) == 3:
@@ -73,7 +77,7 @@ else:
     bannertoolarg += '-o "output.smdh"'
     bannertoolrun = subprocess.Popen(bannertoolarg, shell=True)
     bannertoolrun.wait()
-    # print('smdh generation success')
+    print("Getting filepath...")
     romfs = open('romfs/path.txt', 'w')
     if os.name == 'nt':
         path = os.path.abspath(path)
@@ -95,8 +99,12 @@ else:
     rom.seek(0xC, 0)
     gamecode = str(rom.read(0x4), "ascii")
     rom.close()
+    gamecodehex = f"0x{hexlify(gamecode.encode()).decode()}"
+    gamecodehex = gamecodehex[:-3]
+    print("Running makerom...")
     makeromarg = "makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -icon output.smdh -DAPP_ROMFS=romfs -major 1 -minor 0 -micro 0 -DAPP_VERSION_MAJOR=1 "
     makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "
-    makeromarg += f"-DAPP_PRODUCT_CODE='CTR-H-{gamecode}' "
+    makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{eng_title[0]}" -DAPP_UNIQUE_ID={gamecodehex}'
     makeromrun = subprocess.Popen(makeromarg, shell=True)
     makeromrun.wait()
+    print("CIA generated.")
