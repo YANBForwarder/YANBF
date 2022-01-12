@@ -14,6 +14,7 @@ bannersize = (256, 128)
 parser = argparse.ArgumentParser(description="CTR-NDSForwarder Generator")
 parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
 parser.add_argument("-o", "--output", metavar="output.cia", type=str, nargs=1, help="output CIA")
+parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, help="Custom banner box art")
 
 args = parser.parse_args()
 
@@ -52,9 +53,9 @@ else:
     spa_title = title[5].split("\n")
     chn_title = title[6].split("\n")
     kor_title = title[7].split("\n")
-    if chn_title[0][0] == "\uffff":
+    if chn_title == [""] or chn_title[0][0] == "\uffff":
         chn_title = None
-    if kor_title[0][0] == "\uffff":
+    if kor_title == [""] or kor_title[0][0] == "\uffff":
         kor_title = None
     rom.seek(0xC, 0)
     gamecode = str(rom.read(0x4), "ascii")
@@ -86,42 +87,46 @@ else:
     bannertoolrun.wait()
 
     # get boxart for DS, to make banner
-    print("Downloading boxart...")
-    ba_region = ""
-    if gamecode[3] in ['E', 'T']:
-        ba_region = "US"
-    elif gamecode[3] == 'K':
-        ba_region = "KO"
-    elif gamecode[3] == 'J':
-        ba_region = "JA"
-    elif gamecode[3] == 'D':
-        ba_region = "DE"
-    elif gamecode[3] == 'F':
-        ba_region = "FR"
-    elif gamecode[3] == 'H':
-        ba_region = "NL"
-    elif gamecode[3] == 'I':
-        ba_region = "IT"
-    elif gamecode[3] == 'R':
-        ba_region = "RU"
-    elif gamecode[3] == 'S':
-        ba_region = "ES"
-    elif gamecode[3] == '#':
-        ba_region = "HB"
-    elif gamecode[3] == 'U':
-        ba_region = "AU"
+    if not args.boxart:
+        print("Downloading boxart...")
+        ba_region = ""
+        if gamecode[3] in ['E', 'T']:
+            ba_region = "US"
+        elif gamecode[3] == 'K':
+            ba_region = "KO"
+        elif gamecode[3] == 'J':
+            ba_region = "JA"
+        elif gamecode[3] == 'D':
+            ba_region = "DE"
+        elif gamecode[3] == 'F':
+            ba_region = "FR"
+        elif gamecode[3] == 'H':
+            ba_region = "NL"
+        elif gamecode[3] == 'I':
+            ba_region = "IT"
+        elif gamecode[3] == 'R':
+            ba_region = "RU"
+        elif gamecode[3] == 'S':
+            ba_region = "ES"
+        elif gamecode[3] == '#':
+            ba_region = "HB"
+        elif gamecode[3] == 'U':
+            ba_region = "AU"
+        else:
+            ba_region = "EN"
+        r = requests.get(f"https://art.gametdb.com/ds/coverM/{ba_region}/{gamecode}.jpg")
+        if r.status_code != 200:
+            print("Cannot find box art for game. Are you connected to the internet?")
+            print("Checking for existing boxart...")
+        boxart = open('data/boxart.png', 'wb')
+        boxart.write(r.content)
+        boxart.close()
     else:
-        ba_region = "EN"
-    r = requests.get(f"https://art.gametdb.com/ds/coverM/{ba_region}/{gamecode}.jpg")
-    if r.status_code != 200:
-        print("Cannot find box art for game. Are you connected to the internet?")
-        exit()
-    boxart = open('data/boxart.png', 'wb')
-    boxart.write(r.content)
-    boxart.close()
-
+        if not os.path.isfile(args.boxart[0]):
+            print(f"{args.boxart[0]} does not exist. Is your argument correct?")
+            exit()
     print("Resizing box art...")
-    banner = Image.open('data/boxart.png')
+    banner = Image.open(args.boxart[0] if args.boxart else 'data/boxart.png')
     width, height = banner.size
     new_height = 128
     new_width = new_height * width // height
