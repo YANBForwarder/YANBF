@@ -3,6 +3,15 @@ CTR-NDSForwarder
 
 nds-bootstrap forwarder template that is installed as a 3DS homebrew, to allow for more than 40 forwarders.
 
+How to use:
+  1. Download release zip
+  1. Extract release zip
+  1. Copy all files in `for SD card root` to root of SD card
+  1. Install all CIAs in `cia` folder
+  1. Get Python 3 for your PC
+  1. `pip install Pillow requests`
+  1. `python3 generator.py <path to ROM on SD>`
+
 To build:
   1. figure out a way to put `make_cia` in PATH. Will find a better way to deal with this soon™
   1. edit `romFS:/path.txt` to any file path in `sd:/`

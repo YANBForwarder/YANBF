@@ -112,7 +112,7 @@ else:
         ba_region = "AU"
     else:
         ba_region = "EN"
-    r = requests.get(f"https://art.gametdb.com/ds/coverS/{ba_region}/{gamecode}.png")
+    r = requests.get(f"https://art.gametdb.com/ds/coverM/{ba_region}/{gamecode}.jpg")
     if r.status_code != 200:
         print("Cannot find box art for game. Are you connected to the internet?")
         exit()
@@ -124,12 +124,12 @@ else:
     banner = Image.open('data/boxart.png')
     width, height = banner.size
     new_height = 128
-    new_width = new_height * width // width
+    new_width = new_height * width // height
     banner = banner.resize((new_width, new_height), resample=Image.ANTIALIAS)
     new_image = Image.new('RGBA', (256, 128), (0, 0, 0, 0))
     upper = (256 - banner.size[0]) // 2
     new_image.paste(banner, (upper, 0))
-    new_image.save('data/banner.png')
+    new_image.save('data/banner.png', 'PNG')
 
     print("Creating banner...")
     bannertoolarg = "bannertool makebanner -i data/banner.png -a data/dsboot.wav -o banner.bin"
@@ -159,7 +159,7 @@ else:
     gamecodehex = f"0x{hexlify(gamecode.encode()).decode()}"
     gamecodehex = gamecodehex[:-3]
     print("Running makerom...")
-    makeromarg = "makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -icon output.smdh -DAPP_ROMFS=romfs -major 1 -minor 0 -micro 0 -DAPP_VERSION_MAJOR=1 "
+    makeromarg = "makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner banner.bin -icon output.smdh -DAPP_ROMFS=romfs -major 1 -minor 0 -micro 0 -DAPP_VERSION_MAJOR=1 "
     makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "
     makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{eng_title[0]}" -DAPP_UNIQUE_ID={gamecodehex}'
     makeromrun = subprocess.Popen(makeromarg, shell=True)

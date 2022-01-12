@@ -31,6 +31,8 @@ dist:	forwarder bootstrap sd
 	@cp -f generator/data/build-cia.rsf dist/generator/data/build-cia.rsf
 	@mv -f dist/forwarder.elf dist/generator/data/forwarder.elf
 	@mv -f dist/forwarder.* dist/debug/
+	@cp -f README.md dist/README.md
+	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
 
 	@cd dist && zip -r ../CTR-NDSForwarder.zip *
 
