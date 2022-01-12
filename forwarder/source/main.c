@@ -22,7 +22,7 @@ int main()
 		while(__getline(&line, &length, file) != -1) {
 			FILE *path = fopen("sdmc:/_nds/CTR-NDSForwarder/path.txt", "w");
 			fputs(line, path);
-			fputs("\n", path);
+			// fputs("\n", path);
 			printf("%s\n", line);
 			fclose(path);
 			fclose(file);
