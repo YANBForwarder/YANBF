@@ -6,6 +6,7 @@ nds-bootstrap forwarder template that is installed as a 3DS homebrew, to allow f
 How to use:
   1. Download release zip
   1. Extract release zip
+  1. Get `make_cia`, `makerom` and `bannertool` in PATH
   1. Copy all files in `for SD card root` to root of SD card
   1. Install all CIAs in `cia` folder
   1. Get Python 3 for your PC
