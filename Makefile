@@ -17,10 +17,22 @@ include $(DEVKITARM)/ds_rules
 all:	forwarder bootstrap dist
 
 dist:	forwarder bootstrap sd
-	@mkdir -p dist
+	@mkdir -p dist/cia
+	@mkdir -p dist/generator/data
+	@mkdir -p dist/generator/romfs
+	@mkdir -p dist/debug
+	@mkdir -p 'dist/for SD card root/_nds/CTR-NDSForwarder'
+
 	@cp -f forwarder/forwarder.* dist
-	@cp -f bootstrap/bootstrap.cia dist
-	@cp -f sd/sdcard.nds dist
+	@cp -f bootstrap/bootstrap.cia dist/cia/bootstrap.cia
+	@cp -f sd/sdcard.nds 'dist/for SD card root/_nds/CTR-NDSForwarder/sdcard.nds'
+	@cp -f generator/generator.py dist/generator/generator.py
+	@cp -f generator/bannergif.py dist/generator/bannergif.py
+	@cp -f generator/data/build-cia.rsf dist/generator/data/build-cia.rsf
+	@mv -f dist/forwarder.elf dist/generator/data/forwarder.elf
+	@mv -f dist/forwarder.* dist/debug/
+
+	@cd dist && zip -r ../CTR-NDSForwarder.zip *
 
 forwarder:
 	@$(MAKE) -C forwarder
@@ -46,4 +58,4 @@ clean:
 	@$(MAKE) -C sd clean
 	@$(MAKE) -C universal/bootloader clean
 	@$(MAKE) -C universal/bootstub clean
-	@rm -rf dist universal/data
+	@rm -rf dist universal/data CTR-NDSForwarder.zip

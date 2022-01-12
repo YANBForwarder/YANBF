@@ -81,9 +81,8 @@ else:
     romfs = open('romfs/path.txt', 'w')
     if os.name == 'nt':
         path = os.path.abspath(path)
-        path = "sd:" + path[2:]
+        path = path[2:]
         path = path.replace('\\', '/')
-        romfs.write(f"{path}\n")
     else:
         path = os.path.abspath(path)
         temp = path
@@ -94,7 +93,7 @@ else:
                 break
             temp = direc
         path = path.replace(temp, "")
-        romfs.write(f"sd:{path}\n")
+    romfs.write(f"sd:{path}")
     romfs.close()
     rom.seek(0xC, 0)
     gamecode = str(rom.read(0x4), "ascii")
