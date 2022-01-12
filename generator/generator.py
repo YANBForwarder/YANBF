@@ -1,5 +1,7 @@
 import argparse
 import subprocess
+import os
+import pathlib
 
 from PIL import Image
 from struct import unpack
@@ -13,7 +15,8 @@ parser.add_argument("-o", "--output", metavar="output.cia", type=str, nargs=1, h
 
 args = parser.parse_args()
 
-err = bannergif(args.input[0])
+path = args.input[0]
+err = bannergif(path)
 if err != 0:
     print("Failed to open ROM. Is the path valid?")
     exit()
@@ -48,29 +51,52 @@ else:
     if kor_title[0][0] == "\uffff":
         kor_title = None
     bannertoolarg = 'bannertool makesmdh -i "output.png" '
-    bannertoolarg += f'-js "{jpn_title[0]}" -es "{eng_title[0]}" -fs "{fra_title[0]}" -gs "{ger_title[0]}" -is "{ita_title[0]}" -ss "{spa_title[0]}" -ds "{eng_title[0]}" -ps "{eng_title[0]}" -rs "{eng_title[0]}" -tcs "{eng_title[0]}" -jl "{jpn_title[1]}" -el "{eng_title[1]}" -fl "{fra_title[1]}" -gl "{ger_title[1]}" -il "{ita_title[1]}" -sl "{spa_title[1]}" -dl "{eng_title[1]}" -pl "{eng_title[1]}" -rl "{eng_title[1]}" -tcl "{eng_title[1]}" '
+    bannertoolarg += f'-s "{eng_title[0]}" -js "{jpn_title[0]}" -es "{eng_title[0]}" -fs "{fra_title[0]}" -gs "{ger_title[0]}" -is "{ita_title[0]}" -ss "{spa_title[0]}" '
     if len(jpn_title) == 3:
         haspublisher = True
     if haspublisher:
-        bannertoolarg += f'-jp "{jpn_title[2]}" -ep "{eng_title[2]}" -fp "{fra_title[2]}" -gp "{ger_title[2]}" -ip "{ita_title[2]}" -sp "{spa_title[2]}" -dp "{eng_title[2]}" -pp "{eng_title[2]}" -rp "{eng_title[2]}" -tcp "{eng_title[2]}" '
+        bannertoolarg += f'-l "{eng_title[1]}" -jl "{jpn_title[1]}" -el "{eng_title[1]}" -fl "{fra_title[1]}" -gl "{ger_title[1]}" -il "{ita_title[1]}" -sl "{spa_title[1]}" -p "{eng_title[2]}" -jp "{jpn_title[2]}" -ep "{eng_title[2]}" -fp "{fra_title[2]}" -gp "{ger_title[2]}" -ip "{ita_title[2]}" -sp "{spa_title[2]}" '
     else:
-        bannertoolarg += '-p "nds-bootstrap Forwarder" '
+        bannertoolarg += f'-l "{eng_title[0]}" -jl "{jpn_title[0]}" -el "{eng_title[0]}" -fl "{fra_title[0]}" -gl "{ger_title[0]}" -il "{ita_title[0]}" -sl "{spa_title[0]}" -p "{eng_title[1]}" -jp "{jpn_title[1]}" -ep "{eng_title[1]}" -fp "{fra_title[1]}" -gp "{ger_title[1]}" -ip "{ita_title[1]}" -sp "{spa_title[1]}" '
     if chn_title is not None:
-        bannertoolarg += f'-scs "{chn_title[0]}" -scl "{chn_title[1]}"'
+        bannertoolarg += f'-scs "{chn_title[0]}" '
         if haspublisher:
-            bannertoolarg += f' -scp "{chn_title[2]}" '
-    else:
-        bannertoolarg += f'-scs "{eng_title[0]}" -scl "{eng_title[1]}"'
-        if haspublisher:
-            bannertoolarg += f' -scp "{eng_title[2]}" '
+            bannertoolarg += f'-scl "{chn_title[1]}" -scp "{chn_title[2]}" '
+        else:
+            bannertoolarg += f'-scl "{chn_title[0]}" -scp "{chn_title[1]}" '
     if kor_title is not None:
-        bannertoolarg += f'-ks "{kor_title[0]}" -kl "{kor_title[1]}" '
+        bannertoolarg += f'-ks "{kor_title[0]}" '
         if haspublisher:
-            bannertoolarg += f'-kp "{kor_title[2]}" '
-    else:
-        bannertoolarg += f'-ks "{eng_title[0]}" -kl "{eng_title[1]}" '
-        if haspublisher:
-            bannertoolarg += f' -kp "{eng_title[2]}" '
+            bannertoolarg += f'-kl "{kor_title[1]}" -kp "{kor_title[2]}" '
+        else:
+            bannertoolarg += f'-kl "{kor_title[0]}" -kp "{kor_title[1]}" '
     bannertoolarg += '-o "output.smdh"'
-    subprocess.call(bannertoolarg, shell=True)
-
+    bannertoolrun = subprocess.Popen(bannertoolarg, shell=True)
+    bannertoolrun.wait()
+    # print('smdh generation success')
+    romfs = open('romfs/path.txt', 'w')
+    if os.name == 'nt':
+        path = os.path.abspath(path)
+        path = "sd:" + path[2:]
+        path = path.replace('\\', '/')
+        romfs.write(f"{path}\n")
+    else:
+        path = os.path.abspath(path)
+        temp = path
+        orig_dev = os.stat(temp).st_dev
+        while path != '/':
+            direc = os.path.dirname(temp)
+            if os.stat(direc).st_dev != orig_dev:
+                break
+            temp = direc
+        path = path.replace(temp, "")
+        romfs.write(f"sd:{path}\n")
+    romfs.close()
+    rom.seek(0xC, 0)
+    gamecode = str(rom.read(0x4), "ascii")
+    rom.close()
+    makeromarg = "makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -icon output.smdh -DAPP_ROMFS=romfs -major 1 -minor 0 -micro 0 -DAPP_VERSION_MAJOR=1 "
+    makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "
+    makeromarg += f"-DAPP_PRODUCT_CODE='CTR-H-{gamecode}' "
+    makeromrun = subprocess.Popen(makeromarg, shell=True)
+    makeromrun.wait()

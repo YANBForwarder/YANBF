@@ -14,12 +14,12 @@ To build:
 Current issues:
   - `make_cia` needs to be in PATH. I should probably not do that
   - code is very messy and will make you cry
-  - no way to install more than one forwarder at the moment
   - no actual way to grab cheats at the moment, or rather, I have no idea how to adapt the existing code to do so
-  - no icon or banner. That's next up
+  - no banner. That's next up
 
 Credits:
-  - [devkitPro](https://devkitpro.org) for their toolchain, the app-launcher 3DS example code, and BootStrap
-  - [RocketRobz](https://github.com/RocketRobz) for the forwarder source code
+  - [devkitPro](https://devkitpro.org) for their toolchain and BootStrap
+  - [RocketRobz](https://github.com/RocketRobz/NTR_Forwarder) for the forwarder source code
   - [Universal-Team members](https://github.com/Universal-Team) for dealing with my terrible questions
+  - [aspargas2](https://github.com/aspargas2) for basic python:tm:
   - probably more to come soon because this code isn't even complete yet
