@@ -17,11 +17,11 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	sdcard
 UNIVERSAL	:=	../../universal
-DATA		:=	$(UNIVERSAL)/data
 BUILD		:=	build
 SOURCES		:=	source $(UNIVERSAL)/source
 INCLUDES	:=	include $(UNIVERSAL)/source
-MUSIC       :=  ../music
+DATA		:=	$(UNIVERSAL)/data
+MUSIC		:=  ../music
 
 #---------------------------------------------------------------------------------
 # options for code generation

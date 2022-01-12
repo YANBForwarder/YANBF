@@ -7,6 +7,7 @@
 
 static u32 arm9Sig[3][4];
 sNDSHeaderExt ndsHeader;
+sNDSHeaderExt ndsHeaderBinaryCheck;
 
 // Subroutine function signatures arm9
 u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
@@ -43,18 +44,34 @@ u32 moduleParamsSignature[2]   = {0xDEC00621, 0x2106C0DE};
 //char arm9binary[0x20000];
 
 bool checkDsiBinaries(FILE* ndsFile) {
-	fseek(ndsFile, 0, SEEK_SET);
-	fread(&ndsHeader, 1, sizeof(ndsHeader), ndsFile);
+	u8 unitCode = 0;
 
-	if (ndsHeader.unitCode == 0) {
+	fseek(ndsFile, 0x12, SEEK_SET);
+	fread(&unitCode, 1, 1, ndsFile);
+
+	if (unitCode == 0 || unitCode == 3) {
 		return true;
+	}
+
+	fseek(ndsFile, 0, SEEK_SET);
+	fread(&ndsHeaderBinaryCheck, 1, sizeof(ndsHeaderBinaryCheck), ndsFile);
+
+	if (ndsHeaderBinaryCheck.arm9iromOffset == 0 || ndsHeaderBinaryCheck.arm7iromOffset == 0) {
+		return false;
+	}
+
+	for (int i = 0; i < 3; i++) {
+		arm9Sig[i][0] = 0;
+		arm9Sig[i][1] = 0;
+		arm9Sig[i][2] = 0;
+		arm9Sig[i][3] = 0;
 	}
 
 	fseek(ndsFile, 0x8000, SEEK_SET);
 	fread(arm9Sig[0], sizeof(u32), 4, ndsFile);
-	fseek(ndsFile, ndsHeader.arm9iromOffset, SEEK_SET);
+	fseek(ndsFile, ndsHeaderBinaryCheck.arm9iromOffset, SEEK_SET);
 	fread(arm9Sig[1], sizeof(u32), 4, ndsFile);
-	fseek(ndsFile, ndsHeader.arm7iromOffset, SEEK_SET);
+	fseek(ndsFile, ndsHeaderBinaryCheck.arm7iromOffset, SEEK_SET);
 	fread(arm9Sig[2], sizeof(u32), 4, ndsFile);
 	for (int i = 1; i < 3; i++) {
 		if (arm9Sig[i][0] == arm9Sig[0][0]
@@ -108,8 +125,8 @@ int checkIfHomebrew(FILE* ndsFile) {
 
 	fseek(ndsFile, 0, SEEK_SET);
 	fread(&ndsHeader, 1, sizeof(ndsHeader), ndsFile);
-	
-	fseek(ndsFile, (ndsHeader.arm9romOffset <= 0x200 ? ndsHeader.arm9romOffset : ndsHeader.arm9romOffset+0x800), SEEK_SET);
+
+	fseek(ndsFile, ndsHeader.arm9romOffset + ndsHeader.arm9executeAddress - ndsHeader.arm9destination, SEEK_SET);
 	fread(arm9Sig[0], sizeof(u32), 4, ndsFile);
 	if (arm9Sig[0][0] == 0xE3A00301
 	 && arm9Sig[0][1] == 0xE5800208

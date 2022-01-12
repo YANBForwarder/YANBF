@@ -116,9 +116,9 @@ endif
 
 export GAME_TITLE := $(TARGET)
 
-.PHONY: bootloader bootstub clean arm7/$(TARGET).elf arm9/$(TARGET).elf
+.PHONY: clean arm7/$(TARGET).elf arm9/$(TARGET).elf
 
-all:	bootloader bootstub $(TARGET).nds
+all:	$(TARGET).nds
 
 dist:	all
 	@rm	-fr	hbmenu
@@ -155,6 +155,7 @@ clean:
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).arm9 data
 	$(MAKE) -C arm9 clean
 	$(MAKE) -C arm7 clean
+
 
 #---------------------------------------------------------------------------------
 else

@@ -93,6 +93,12 @@ int main() {
 
 	setPowerButtonCB(powerButtonCB);
 
+	// Check for 3DS
+	u8 byteBak = i2cReadRegister(0x4A, 0x71);
+	i2cWriteRegister(0x4A, 0x71, 0xD2);
+	fifoSendValue32(FIFO_USER_05, i2cReadRegister(0x4A, 0x71));
+	i2cWriteRegister(0x4A, 0x71, byteBak);
+
 	// Keep the ARM7 mostly idle
 	while (!exitflag) {
 		if(fifoCheckValue32(FIFO_USER_01)) {

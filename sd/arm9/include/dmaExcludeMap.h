@@ -4,6 +4,8 @@
 static const char cardReadDMAExcludeList[][4] = {
 	"AY6", // Bangai-O Spirits
 	"AWD", // Diddy Kong Racing
+	"A3V", // Digimon World: Dawn
+	"A6R", // Digimon World: Dusk
 	"YV5", // Dragon Quest V: Hand of the Heavenly Bride
 	"APR", // Feel the Magic: XY-XX
 	"AFF", // Final Fantasy III
@@ -18,7 +20,6 @@ static const char cardReadDMAExcludeList[][4] = {
 	"COL", // Mario & Sonic at the Olympic Winter Games
 	"AUG", // Need for Speed: Underground 2
 	"A2D", // New(er) Super Mario Bros. (DS)
-	"ARR", // Ridge Racer DS
 	"B8I", // Spider-Man: Edge of Time
 	"AST", // Star Wars: Episode III: Revenge of the Sith
 	"TAM", // The Amazing Spider-Man

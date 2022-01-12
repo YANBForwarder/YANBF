@@ -10,7 +10,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "defines.h"
 #include "ndsheaderbanner.h"
 #include "nds_loader_arm9.h"
 #include "nitrofs.h"
@@ -18,6 +17,7 @@
 
 #include "inifile.h"
 #include "fileCopy.h"
+#include "perGameSettings.h"
 
 #include "twlClockExcludeMap.h"
 #include "dmaExcludeMap.h"
@@ -27,9 +27,6 @@
 
 using namespace std;
 
-static bool boostCpu = false;
-static bool boostVram = false;
-static int dsiMode = 0;
 static int language = -1;
 static int region = -2;
 static bool cacheFatTable = false;
@@ -292,6 +289,7 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
     return str;
 }
 
+
 std::string ndsPath;
 std::string romfolder;
 std::string filename;
@@ -320,8 +318,17 @@ int main(int argc, char **argv) {
 
 	// Cut slot1 power to save battery
 	disableSlot1();
-	consoleDemoInit();
-	iprintf("Starting.\n");
+
+	keysSetRepeat(25, 5);
+
+	*(vu32*)0x0DFFFE0C = 0x4652544E;
+	bool debugRam = (*(vu32*)0x0DFFFE0C == 0x4652544E);
+
+	int consoleModel = 0; // 0: Retail DSi
+	if (debugRam) {
+		consoleModel = fifoGetValue32(FIFO_USER_05) == 0xD2 ? 1 : 2; // 1: Panda DSi, 2: 3DS/2DS
+	}
+
 	if (fatInitDefault()) {
 		FILE* pathtxt = fopen("/_nds/CTR-NDSForwarder/path.txt", "r");
 		char path[255];
@@ -336,20 +343,20 @@ int main(int argc, char **argv) {
 		} else {
 		nitroFSInit("/_nds/CTR-NDSForwarder/sdcard.nds");
 
-		ndsPath = (std::string)path;
-		iprintf("Working???\n");
 		CIniFile ntrforwarderini( "sd:/_nds/ntr_forwarder.ini" );
 
 		bootstrapFile = ntrforwarderini.GetInt("NTR-FORWARDER", "BOOTSTRAP_FILE", 0);
 
-		printf(path);
+		ndsPath = (std::string)path;
+		/*consoleDemoInit();
+		printf(argv[1]);
 		printf("\n");
 		printf("Press START\n");
 		while (1) {
 			scanKeys();
 			if (keysDown() & KEY_START) break;
 			swiWaitForVBlank();
-		}
+		}*/
 
 		romfolder = ndsPath;
 		while (!romfolder.empty() && romfolder[romfolder.size()-1] != '/') {
@@ -362,6 +369,12 @@ int main(int argc, char **argv) {
 		if (std::string::npos != last_slash_idx)
 		{
 			filename.erase(0, last_slash_idx + 1);
+		}
+
+		GameSettings gameSettings(filename);
+		scanKeys();
+		if(keysHeld() & KEY_Y) {
+			gameSettings.menu();
 		}
 
 		FILE *f_nds_file = fopen(filename.c_str(), "rb");
@@ -405,6 +418,7 @@ int main(int argc, char **argv) {
 			fwrite((char*)__DSiHeader+0x230, sizeof(u32), 2, srBackendFile);
 			fclose(headerFile);
 			fclose(srBackendFile);
+
 			// Delete cheat data
 			remove("sd:/_nds/nds-bootstrap/cheatData.bin");
 			remove("sd:/_nds/nds-bootstrap/wideCheatData.bin");
@@ -420,7 +434,10 @@ int main(int argc, char **argv) {
 				typeToReplace = ".app";
 			}
 
-			savename = ReplaceAll(filename, typeToReplace, ".sav");
+			char savExtension[16] = ".sav";
+			if(gameSettings.saveNo > 0)
+				snprintf(savExtension, sizeof(savExtension), ".sav%d", gameSettings.saveNo);
+			savename = ReplaceAll(filename, typeToReplace, savExtension);
 			romFolderNoSlash = romfolder;
 			RemoveTrailingSlashes(romFolderNoSlash);
 			savepath = romFolderNoSlash+"/saves/"+savename;
@@ -506,32 +523,17 @@ int main(int argc, char **argv) {
 					}
 				}
 
-				bool saveSizeFixNeeded = false;
-
-				// TODO: If the list gets large enough, switch to bsearch().
-				for (unsigned int i = 0; i < sizeof(saveSizeFixList) / sizeof(saveSizeFixList[0]); i++) {
-					if (memcmp(ndsHeader.gameCode, saveSizeFixList[i], 3) == 0) {
-						// Found a match.
-						saveSizeFixNeeded = true;
-						break;
-					}
-				}
-
-				if ((orgsavesize == 0 && savesize > 0) || (orgsavesize < savesize && saveSizeFixNeeded)) {
+				if ((orgsavesize == 0 && savesize > 0) || (orgsavesize < savesize)) {
 					consoleDemoInit();
 					iprintf ((orgsavesize == 0) ? "Creating save file...\n" : "Expanding save file...\n");
 					iprintf ("\n");
 					takeWhileMsg();
 
-					if (orgsavesize > 0) {
-						fsizeincrease(savepath.c_str(), "sd:/temp.sav", savesize);
-					} else {
-						FILE *pFile = fopen(savepath.c_str(), "wb");
-						if (pFile) {
-							fseek(pFile, savesize - 1, SEEK_SET);
-							fputc('\0', pFile);
-							fclose(pFile);
-						}
+					FILE *pFile = fopen(savepath.c_str(), orgsavesize > 0 ? "r+" : "wb");
+					if (pFile) {
+						fseek(pFile, savesize - 1, SEEK_SET);
+						fputc('\0', pFile);
+						fclose(pFile);
 					}
 					iprintf ("Done!\n");
 
@@ -541,7 +543,12 @@ int main(int argc, char **argv) {
 				}
 			}
 
-			if (isHomebrew == 0 && (ndsHeader.unitCode == 2 && !dsiBinariesFound)) {
+			CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
+
+			int donorSdkVer = 0;
+			bool dsModeForced = false;
+
+			if (isHomebrew == 0 && ndsHeader.unitCode == 2 && !dsiBinariesFound) {
 				consoleDemoInit();
 				iprintf ("The DSi binaries are missing.\n");
 				iprintf ("Please obtain a clean ROM\n");
@@ -551,19 +558,15 @@ int main(int argc, char **argv) {
 				iprintf ("DS mode.\n");
 				while (1) {
 					scanKeys();
-					if (keysDown() & KEY_A) break;
+					if (keysDown() & KEY_A) {
+						dsModeForced = true;
+						break;
+					}
 					swiWaitForVBlank();
 				}
 			}
 
-			int donorSdkVer = 0;
-			bool dsModeForced = false;
-
 			if (isHomebrew == 0) {
-				if (ndsHeader.unitCode > 0 && ndsHeader.unitCode < 3) {
-					scanKeys();
-					dsModeForced = (keysHeld() & KEY_Y);
-				}
 				donorSdkVer = SetDonorSDK(ndsPath.c_str());
 			}
 
@@ -576,14 +579,8 @@ int main(int argc, char **argv) {
 				fatGetAliasPath("sd:/", dsiWarePrvPath.c_str(), sfnPrv);
 			}
 
-			CIniFile bootstrapini( "sd:/_nds/nds-bootstrap.ini" );
 			// Fix weird bug where some settings would be cleared
-			boostCpu = bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_CPU", boostCpu);
-			boostVram = bootstrapini.GetInt("NDS-BOOTSTRAP", "BOOST_VRAM", boostVram);
-			dsiMode = bootstrapini.GetInt("NDS-BOOTSTRAP", "DSI_MODE", dsiMode);
 			cacheFatTable = bootstrapini.GetInt("NDS-BOOTSTRAP", "CACHE_FAT_TABLE", cacheFatTable);
-			language = bootstrapini.GetInt("NDS-BOOTSTRAP", "LANGUAGE", language);
-			region = bootstrapini.GetInt("NDS-BOOTSTRAP", "REGION", region);
 
 			// Write
 			bootstrapini.SetString("NDS-BOOTSTRAP", "NDS_PATH", ndsPath);
@@ -598,26 +595,20 @@ int main(int argc, char **argv) {
 				bootstrapini.SetString("NDS-BOOTSTRAP", "AP_FIX_PATH", isDSiWare ? "" : setApFix(filename.c_str()));
 			}
 			bootstrapini.SetString("NDS-BOOTSTRAP", "HOMEBREW_ARG", "");
-			bootstrapini.SetInt("NDS-BOOTSTRAP", "BOOST_CPU", setClockSpeed(filename.c_str()));
-			//bootstrapini.SetInt("NDS-BOOTSTRAP", "BOOST_VRAM", boostVram);
-			bootstrapini.SetInt("NDS-BOOTSTRAP", "CARD_READ_DMA", setCardReadDMA(filename.c_str()));
-			bootstrapini.SetInt("NDS-BOOTSTRAP", "ASYNC_CARD_READ", setAsyncCardRead(filename.c_str()));
-			if (dsModeForced || ndsHeader.unitCode == 0 || (ndsHeader.unitCode > 0 && ndsHeader.unitCode < 3 && !dsiBinariesFound)) {
-				bootstrapini.SetInt("NDS-BOOTSTRAP", "DSI_MODE", 0);
-			} else {
-				bootstrapini.SetInt("NDS-BOOTSTRAP", "DSI_MODE", 1);
-			}
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "BOOST_CPU", gameSettings.boostCpu == -1 ? false : gameSettings.boostCpu);
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "BOOST_VRAM", gameSettings.boostVram == -1 ? false : gameSettings.boostVram);
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "CARD_READ_DMA", gameSettings.cardReadDMA == -1 ? true : gameSettings.cardReadDMA);
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "ASYNC_CARD_READ", gameSettings.asyncCardRead == -1 ? false : gameSettings.asyncCardRead);
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "DSI_MODE", dsModeForced ? 0 : (gameSettings.dsiMode == -1 ? true : gameSettings.dsiMode));
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "SWI_HALT_HOOK", gameSettings.swiHaltHook == -1 ? true : gameSettings.swiHaltHook);
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "EXTENDED_MEMORY", gameSettings.expandRomSpace == -1 ? false : gameSettings.expandRomSpace);
 			//bootstrapini.SetInt("NDS-BOOTSTRAP", "CACHE_FAT_TABLE", cacheFatTable);
 			bootstrapini.SetInt("NDS-BOOTSTRAP", "DONOR_SDK_VER", donorSdkVer);
 			bootstrapini.SetInt("NDS-BOOTSTRAP", "PATCH_MPU_REGION", 0);
 			bootstrapini.SetInt("NDS-BOOTSTRAP", "PATCH_MPU_SIZE", 0);
-			#ifdef DSI
-			bootstrapini.SetInt("NDS-BOOTSTRAP", "CONSOLE_MODEL", 0);
-			#else
-			bootstrapini.SetInt("NDS-BOOTSTRAP", "CONSOLE_MODEL", 2);
-			#endif
-			bootstrapini.SetInt("NDS-BOOTSTRAP", "LANGUAGE", language);
-			bootstrapini.SetInt("NDS-BOOTSTRAP", "REGION", region);
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "CONSOLE_MODEL", consoleModel);
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "LANGUAGE", gameSettings.language == -2 ? language : gameSettings.language);
+			bootstrapini.SetInt("NDS-BOOTSTRAP", "REGION", gameSettings.region == -3 ? region : gameSettings.region);
 			bootstrapini.SaveIniFile( "sd:/_nds/nds-bootstrap.ini" );
 
 			if (isHomebrew == 1) {
@@ -652,11 +643,7 @@ int main(int argc, char **argv) {
 
 	iprintf ("\n");		
 	iprintf ("Press B to return to\n");
-	#ifdef DSI
-	iprintf ("DSi Menu.\n");
-	#else
-	iprintf ("HOME Menu.\n");
-	#endif
+	iprintf (consoleModel >= 2 ? "HOME Menu.\n" : "DSi Menu.\n");
 
 	while (1) {
 		scanKeys();
