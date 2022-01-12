@@ -5,6 +5,9 @@
 *.3dsx
 *.cia
 *.smdh
+*.png
+*.gif
+__pycache__
 dist
 forwarder/build
 bootstrap/arm7/build
