@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import os
+import requests
 
 from PIL import Image
 from struct import unpack
@@ -8,6 +9,7 @@ from binascii import hexlify
 from bannergif import bannergif
 
 iconsize = (48, 48)
+bannersize = (256, 128)
 
 parser = argparse.ArgumentParser(description="CTR-NDSForwarder Generator")
 parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
@@ -27,8 +29,9 @@ else:
     im = im.resize(iconsize)
     im.save('output.png')
 
+
     # get banner title
-    print("Extracting game title...")
+    print("Extracting game metadata...")
     rom = open(args.input[0], "rb")
     rom.seek(0x68, 0)
     banneraddrle = rom.read(4)
@@ -53,6 +56,10 @@ else:
         chn_title = None
     if kor_title[0][0] == "\uffff":
         kor_title = None
+    rom.seek(0xC, 0)
+    gamecode = str(rom.read(0x4), "ascii")
+    rom.close()
+
     print("Creating SMDH...")
     bannertoolarg = 'bannertool makesmdh -i "output.png" '
     bannertoolarg += f'-s "{eng_title[0]}" -js "{jpn_title[0]}" -es "{eng_title[0]}" -fs "{fra_title[0]}" -gs "{ger_title[0]}" -is "{ita_title[0]}" -ss "{spa_title[0]}" '
@@ -77,6 +84,59 @@ else:
     bannertoolarg += '-o "output.smdh"'
     bannertoolrun = subprocess.Popen(bannertoolarg, shell=True)
     bannertoolrun.wait()
+
+    # get boxart for DS, to make banner
+    print("Downloading boxart...")
+    ba_region = ""
+    if gamecode[3] in ['E', 'T']:
+        ba_region = "US"
+    elif gamecode[3] == 'K':
+        ba_region = "KO"
+    elif gamecode[3] == 'J':
+        ba_region = "JA"
+    elif gamecode[3] == 'D':
+        ba_region = "DE"
+    elif gamecode[3] == 'F':
+        ba_region = "FR"
+    elif gamecode[3] == 'H':
+        ba_region = "NL"
+    elif gamecode[3] == 'I':
+        ba_region = "IT"
+    elif gamecode[3] == 'R':
+        ba_region = "RU"
+    elif gamecode[3] == 'S':
+        ba_region = "ES"
+    elif gamecode[3] == '#':
+        ba_region = "HB"
+    elif gamecode[3] == 'U':
+        ba_region = "AU"
+    else:
+        ba_region = "EN"
+    r = requests.get(f"https://art.gametdb.com/ds/coverS/{ba_region}/{gamecode}.png")
+    if r.status_code != 200:
+        print("Cannot find box art for game. Are you connected to the internet?")
+        exit()
+    boxart = open('data/boxart.png', 'wb')
+    boxart.write(r.content)
+    boxart.close()
+
+    print("Resizing box art...")
+    banner = Image.open('data/boxart.png')
+    width, height = banner.size
+    new_height = 128
+    new_width = new_height * width // width
+    banner = banner.resize((new_width, new_height), resample=Image.ANTIALIAS)
+    new_image = Image.new('RGBA', (256, 128), (0, 0, 0, 0))
+    upper = (256 - banner.size[0]) // 2
+    new_image.paste(banner, (upper, 0))
+    new_image.save('data/banner.png')
+
+    print("Creating banner...")
+    bannertoolarg = "bannertool makebanner -i data/banner.png -a data/dsboot.wav -o banner.bin"
+    bannertoolrun = subprocess.Popen(bannertoolarg, shell=True)
+    bannertoolrun.wait()
+
+    # CIA generation
     print("Getting filepath...")
     romfs = open('romfs/path.txt', 'w')
     if os.name == 'nt':
@@ -95,9 +155,7 @@ else:
         path = path.replace(temp, "")
     romfs.write(f"sd:{path}")
     romfs.close()
-    rom.seek(0xC, 0)
-    gamecode = str(rom.read(0x4), "ascii")
-    rom.close()
+
     gamecodehex = f"0x{hexlify(gamecode.encode()).decode()}"
     gamecodehex = gamecodehex[:-3]
     print("Running makerom...")

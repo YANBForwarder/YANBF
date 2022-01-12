@@ -9,6 +9,7 @@
 *.gif
 *.exe
 *.zip
+*.bin
 __pycache__
 dist
 forwarder/build
