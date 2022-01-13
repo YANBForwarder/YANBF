@@ -7,11 +7,13 @@ How to use:
   1. Download release zip
   1. Download [SD Forwarder Pack](https://github.com/RocketRobz/NTR_Forwarder/releases)
   1. Extract both zips
-  1. Copy all files in `for SD card root` in both zips to root of SD card
-  1. Install all CIAs in `cia` folder
   1. Get Python 3 for your PC
+  1. Copy all files in `for SD card root` in both zips to root of SD card
   1. `pip install Pillow requests`
   1. `python3 generator.py <path to ROM on SD>`
+  1. Copy `output.cia` to the `cias` folder on your SD
+  1. Insert SD, then boot, then FBI
+  1. Install all CIAs in `cias` folder
 
 To build:
   1. edit `romFS:/path.txt` to any file path in `sd:/`. Do NOT end with newline, this kills it.
