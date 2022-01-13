@@ -2,6 +2,7 @@ import argparse
 import subprocess
 import os
 import requests
+import unicodedata
 
 from PIL import Image
 from struct import unpack
@@ -146,12 +147,11 @@ else:
     # CIA generation
     print("Getting filepath...")
     romfs = open('romfs/path.txt', 'w')
+    path = unicodedata.normalize("NFC", os.path.abspath(path))
     if os.name == 'nt':
-        path = os.path.abspath(path)
         path = path[2:]
         path = path.replace('\\', '/')
     else:
-        path = os.path.abspath(path)
         temp = path
         orig_dev = os.stat(temp).st_dev
         while path != '/':
