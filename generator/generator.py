@@ -91,8 +91,11 @@ else:
         else:
             bannertoolarg += f'-ks "{kor_title[0]}" -kl "{kor_title[0]}" -kp "{kor_title[1]}" '
     bannertoolarg += '-o "output.smdh"'
-    bannertoolrun = subprocess.Popen(bannertoolarg, shell=True)
+    bannertoolrun = subprocess.Popen(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     bannertoolrun.wait()
+    if "Created SMDH" not in bannertoolrun.stdout.readline():
+        print("Failed to run bannertool.")
+        exit()
 
     # get boxart for DS, to make banner
     if not args.boxart:
@@ -146,8 +149,11 @@ else:
 
     print("Creating banner...")
     bannertoolarg = f"{cmdarg}bannertool makebanner -i data/banner.png -a data/dsboot.wav -o banner.bin"
-    bannertoolrun = subprocess.Popen(bannertoolarg, shell=True)
+    bannertoolrun = subprocess.Popen(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     bannertoolrun.wait()
+    if "Created banner" not in bannertoolrun.stdout.readline():
+        print("Failed to run bannertool.")
+        exit()
 
     # CIA generation
     print("Getting filepath...")
@@ -174,7 +180,10 @@ else:
     makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner banner.bin -icon output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
     makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "
     makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{eng_title[0]}" -DAPP_UNIQUE_ID={gamecodehex}'
-    makeromrun = subprocess.Popen(makeromarg, shell=True)
+    makeromrun = subprocess.Popen(makeromarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     makeromrun.wait()
+    if makeromrun.stdout.readline() != "":
+        print("Failed to run makerom.")
+        exit()
     print("CIA generated.")
     exit()
