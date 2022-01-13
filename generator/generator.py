@@ -66,25 +66,30 @@ else:
 
     print("Creating SMDH...")
     bannertoolarg = f'{cmdarg}bannertool makesmdh -i "output.png" '
-    bannertoolarg += f'-s "{eng_title[0]}" -js "{jpn_title[0]}" -es "{eng_title[0]}" -fs "{fra_title[0]}" -gs "{ger_title[0]}" -is "{ita_title[0]}" -ss "{spa_title[0]}" '
     if len(jpn_title) == 3:
         haspublisher = True
     if haspublisher:
-        bannertoolarg += f'-l "{eng_title[1]}" -jl "{jpn_title[1]}" -el "{eng_title[1]}" -fl "{fra_title[1]}" -gl "{ger_title[1]}" -il "{ita_title[1]}" -sl "{spa_title[1]}" -p "{eng_title[2]}" -jp "{jpn_title[2]}" -ep "{eng_title[2]}" -fp "{fra_title[2]}" -gp "{ger_title[2]}" -ip "{ita_title[2]}" -sp "{spa_title[2]}" '
+        bannertoolarg += f'-s "{eng_title[0]} {eng_title[1]}" -js "{jpn_title[0]} {jpn_title[1]}" -fs "{fra_title[0]} {fra_title[1]}" -gs "{fra_title[0]} {ger_title[1]}" -is "{ita_title[0]} {ita_title[1]}" -ss "{spa_title[0]} {spa_title[1]}" '
+        bannertoolarg += f'-l "{eng_title[0]} {eng_title[1]}" -jl "{jpn_title[0]} {jpn_title[1]}" -fl "{fra_title[0]} {fra_title[1]}" -gl "{fra_title[0]} {ger_title[1]}" -il "{ita_title[0]} {ita_title[1]}" -sl "{spa_title[0]} {spa_title[1]}" '
+        bannertoolarg += f'-p "{eng_title[2]}" -jp "{jpn_title[2]}" -fp "{fra_title[2]}" -gp "{ger_title[2]}" -ip "{ita_title[2]}" -sp "{spa_title[2]}" '
     else:
-        bannertoolarg += f'-l "{eng_title[0]}" -jl "{jpn_title[0]}" -el "{eng_title[0]}" -fl "{fra_title[0]}" -gl "{ger_title[0]}" -il "{ita_title[0]}" -sl "{spa_title[0]}" -p "{eng_title[1]}" -jp "{jpn_title[1]}" -ep "{eng_title[1]}" -fp "{fra_title[1]}" -gp "{ger_title[1]}" -ip "{ita_title[1]}" -sp "{spa_title[1]}" '
+        bannertoolarg += f'-s "{eng_title[0]}" -js "{jpn_title[0]}" -fs "{fra_title[0]}" -gs "{fra_title[0]}" -is "{ita_title[0]}" -ss "{spa_title[0]}" '
+        bannertoolarg += f'-l "{eng_title[0]}" -jl "{jpn_title[0]}" -fl "{fra_title[0]}" -gl "{ger_title[0]}" -il "{ita_title[0]}" -sl "{spa_title[0]}" '
+        bannertoolarg += f'-p "{eng_title[1]}" -jp "{jpn_title[1]}" -fp "{fra_title[1]}" -gp "{ger_title[1]}" -ip "{ita_title[1]}" -sp "{spa_title[1]}" '
     if chn_title is not None:
-        bannertoolarg += f'-scs "{chn_title[0]}" '
         if haspublisher:
-            bannertoolarg += f'-scl "{chn_title[1]}" -scp "{chn_title[2]}" '
+            bannertoolarg += f'-scs "{chn_title[0]} {chn_title[1]}" '
+            bannertoolarg += f'-scl "{chn_title[0]} {chn_title[1]}" '
+            bannertoolarg += f'-scp "{chn_title[2]}" '
         else:
-            bannertoolarg += f'-scl "{chn_title[0]}" -scp "{chn_title[1]}" '
+            bannertoolarg += f'-scs "{chn_title[0]}" -scl "{chn_title[0]} -scp "{chn_title[1]}" '
     if kor_title is not None:
-        bannertoolarg += f'-ks "{kor_title[0]}" '
         if haspublisher:
-            bannertoolarg += f'-kl "{kor_title[1]}" -kp "{kor_title[2]}" '
+            bannertoolarg += f'-ks "{kor_title[0]} {kor_title[1]}" '
+            bannertoolarg += f'-kl "{kor_title[0]} {kor_title[1]}" '
+            bannertoolarg += f'-kp "{kor_title[2]}" '
         else:
-            bannertoolarg += f'-kl "{kor_title[0]}" -kp "{kor_title[1]}" '
+            bannertoolarg += f'-ks "{kor_title[0]}" -kl "{kor_title[0]}" -kp "{kor_title[1]}" '
     bannertoolarg += '-o "output.smdh"'
     bannertoolrun = subprocess.Popen(bannertoolarg, shell=True)
     bannertoolrun.wait()
