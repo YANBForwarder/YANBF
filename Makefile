@@ -32,6 +32,7 @@ dist:	forwarder bootstrap sd
 	@rm -f dist/forwarder.*
 	@cp -f README.md dist/README.md
 	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
+	@cp -f static/ntr_forwarder.ini 'dist/for SD card root/_nds/ntr_forwarder.ini'
 
 	@cd dist && zip -r ../CTR-NDSForwarder.zip *
 

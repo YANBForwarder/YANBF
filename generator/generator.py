@@ -163,8 +163,8 @@ else:
     romfs.write(f"sd:{path}")
     romfs.close()
 
-    gamecodehex = f"0x{hexlify(gamecode.encode()).decode()}"
-    gamecodehex = gamecodehex[:-3]
+    gamecodehex = hexlify(gamecode.encode()).decode()
+    gamecodehex = f"0x{gamecodehex[3:8]}"
     print("Running makerom...")
     makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner banner.bin -icon output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
     makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "

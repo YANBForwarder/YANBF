@@ -265,8 +265,6 @@ void stop (void) {
 	}
 }
 
-char filePath[PATH_MAX];
-
 //---------------------------------------------------------------------------------
 void doPause() {
 //---------------------------------------------------------------------------------
@@ -338,8 +336,8 @@ int main(int argc, char **argv) {
 		iprintf ("fatinitDefault failed!\n");
 	} else {
 		FILE* pathtxt = fopen("/_nds/CTR-NDSForwarder/path.txt", "r");
-		char path[255];
-		if(fgets(path, 255, pathtxt)==NULL) {
+		char path[PATH_MAX];
+		if(fgets(path, PATH_MAX, pathtxt) == NULL) {
 			consoleDemoInit();
 			iprintf("Failed. Unknown\n");
 		} else if (access(path, F_OK) != 0) {

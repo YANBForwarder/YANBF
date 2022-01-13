@@ -20,3 +20,4 @@ sd/arm7/build
 sd/arm9/build
 universal/data
 universal/bootloader/build
+generator/romfs/path.txt
