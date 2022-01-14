@@ -89,22 +89,16 @@ else:
     elif bannerversion == 3:
         langnum = 8
 
-    # crc checking
-    rom.seek(banneraddr + 0x2)
-    crc083F = unpack("<H", rom.read(2))[0]
-    rom.seek(banneraddr + 0x20)
-    data = rom.read(0x840 - 0x20)
-    calcrc = modbus(data)
-    if crc083F != calcrc:
-        print(f"Banner version {bannerversion}. Banner CRC does not match. If this is a ROM hack, please contact the ROM hack developer.")
-        die()
+    # crc checking, ignore banner version 1
     if bannerversion >= 2:
         rom.seek(banneraddr + 0x4)
         crc093F = unpack("<H", rom.read(2))[0]
         rom.seek(banneraddr + 0x20)
         data = rom.read(0x940 - 0x20)
         calcrc = modbus(data)
-        if crc093F == calcrc:
+        if crc093F != calcrc:
+            langnum = 6
+        else:
             if bannerversion == 3:
                 rom.seek(banneraddr + 0x6)
                 crc0A3F = unpack("<H", rom.read(2))[0]
@@ -113,13 +107,10 @@ else:
                 calcrc = modbus(data)
                 if crc0A3F != calcrc:
                     langnum = 7
-        else:
-            langnum = 6
     title = []
     for x in range(langnum):
         offset = 0x240 + (0x100 * x)
         rom.seek(banneraddr + offset, 0)
-        print(len(title))
         title.append(str(rom.read(0x100), "utf-16-le"))
         title[x] = title[x].split('\0', 1)[0]
     jpn_title = title[0].split("\n")
