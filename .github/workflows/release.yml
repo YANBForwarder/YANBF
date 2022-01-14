@@ -32,7 +32,9 @@ jobs:
           name: build
       - name: Create zip for Windows
         run: |
-          mv -f static/bannertool.exe dist/generator/bannertool.exe
+          wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
+          unzip bannertool.zip
+          mv -f windows-x86_64/bannertool.exe dist/generator/bannertool.exe
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-win_x86_64.zip"
           unzip makerom-v0.18-win_x86_64.zip
           mv -f makerom.exe dist/generator/makerom.exe
@@ -40,7 +42,7 @@ jobs:
           rm -rf generator/makerom.exe generator/bannertool.exe
       - name: Create zip for macOS
         run: |
-          cp linux-x86_64/bannertool dist/generator/bannertool
+          cp mac-x86_64/bannertool dist/generator/bannertool
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-macos_x86_64.zip"
           unzip makerom-v0.18-macos_x86_64.zip
           mv -f makerom dist/generator/makerom
@@ -52,8 +54,6 @@ jobs:
           rm -rf generator/makerom generator/bannertool
       - name: Create zip for Linux
         run: |
-          wget "https://github.com/Steveice10/bannertool/releases/download/1.2.0/bannertool.zip"
-          unzip bannertool.zip
           cp linux-x86_64/bannertool dist/generator/bannertool
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-ubuntu_x86_64.zip"
           unzip makerom-v0.18-ubuntu_x86_64.zip
