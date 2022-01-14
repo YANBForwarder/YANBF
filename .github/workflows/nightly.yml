@@ -23,13 +23,13 @@ jobs:
           wget "https://github.com/ihaveamac/ctr_toolkit/releases/download/make_cia6.4builds/make_cia6.4builds.zip"
           unzip make_cia6.4builds.zip
           sudo cp linux/make_cia /usr/local/bin/make_cia && sudo chmod +x /usr/local/bin/make_cia
-      - name: Make CTR-NDSForwarder
+      - name: Make YANBF
         run: |
           make dist
       - name: Prepare for build publishing
         run: |
           mkdir -p ~/artifacts
-          cp CTR-NDSForwarder.zip ~/artifacts
+          cp YANBF.zip ~/artifacts
       - name: Publish build to GH Actions
         uses: actions/upload-artifact@v2
         with:

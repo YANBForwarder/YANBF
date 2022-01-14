@@ -1,4 +1,4 @@
-CTR-NDSForwarder
+Yet Another nds-bootstrap Forwarder
 =======
 
 nds-bootstrap forwarder template that is installed as a 3DS homebrew, to allow for more than 40 forwarders.

@@ -28,7 +28,7 @@ dist:	forwarder bootstrap
 	@cp -f README.md dist/README.md
 	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
 
-	@cd dist && zip -r ../CTR-NDSForwarder.zip *
+	@cd dist && zip -r ../YANBF.zip *
 
 forwarder:
 	@$(MAKE) -C forwarder
@@ -50,4 +50,4 @@ clean:
 	@$(MAKE) -C bootstrap clean
 	@$(MAKE) -C universal/bootloader clean
 	@$(MAKE) -C universal/bootstub clean
-	@rm -rf dist universal/data CTR-NDSForwarder.zip
+	@rm -rf dist universal/data YANBF.zip

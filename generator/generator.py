@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 """
+YANBF
 Copyright © 2022-present lifehackerhansol
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,7 +37,7 @@ from binascii import hexlify
 from bannergif import bannergif
 
 
-parser = argparse.ArgumentParser(description="CTR-NDSForwarder Generator")
+parser = argparse.ArgumentParser(description="YANBF Generator")
 parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
 parser.add_argument("-o", "--output", metavar="output.cia", type=str, nargs=1, help="output CIA")
 parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, help="Custom banner box art")

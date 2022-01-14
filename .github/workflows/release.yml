@@ -1,4 +1,4 @@
-name: Build CTR-NDSForwarder Release
+name: Build YANBF Release
 
 on:
   release:
@@ -18,13 +18,13 @@ jobs:
           wget "https://github.com/ihaveamac/ctr_toolkit/releases/download/make_cia6.4builds/make_cia6.4builds.zip"
           unzip make_cia6.4builds.zip
           sudo cp linux/make_cia /usr/local/bin/make_cia && sudo chmod +x /usr/local/bin/make_cia
-      - name: Make CTR-NDSForwarder
+      - name: Make YANBF
         run: |
           make dist
       - name: Prepare for build publishing
         run: |
           mkdir -p ~/artifacts
-          cp CTR-NDSForwarder.zip ~/artifacts
+          cp YANBF.zip ~/artifacts
       - name: Publish build to GH Actions
         uses: actions/upload-artifact@v2
         with:
@@ -38,7 +38,7 @@ jobs:
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-win_x86_64.zip"
           unzip makerom-v0.18-win_x86_64.zip
           mv -f makerom.exe dist/generator/makerom.exe
-          cd dist && zip -r ../CTR-NDSForwarder-Windows.zip *
+          cd dist && zip -r ../YANBF-Windows.zip *
           rm -rf generator/makerom.exe generator/bannertool.exe
       - name: Create zip for macOS
         run: |
@@ -50,7 +50,7 @@ jobs:
           chmod +x dist/generator/bannertool
           chmod +x dist/generator/makerom
           chmod +x dist/generator/generator.py
-          cd dist && zip -r ../CTR-NDSForwarder-macOS.zip *
+          cd dist && zip -r ../YANBF-macOS.zip *
           rm -rf generator/makerom generator/bannertool
       - name: Create zip for Linux
         run: |
@@ -61,12 +61,12 @@ jobs:
           chmod +x dist/generator/makerom
           chmod +x dist/generator/bannertool
           chmod +x dist/generator/generator.py
-          cd dist && zip -r ../CTR-NDSForwarder-Linux.zip *
+          cd dist && zip -r ../YANBF-Linux.zip *
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            CTR-NDSForwarder-Windows.zip
-            CTR-NDSForwarder-macOS.zip
-            CTR-NDSForwarder-Linux.zip
+            YANBF-Windows.zip
+            YANBF-macOS.zip
+            YANBF-Linux.zip

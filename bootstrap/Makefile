@@ -115,7 +115,7 @@ export GAME_TITLE := $(TARGET)
 all: $(TARGET).nds
 	
 $(TARGET).nds:	$(TARGET).arm7 $(TARGET).arm9
-	ndstool -c $@ -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf -b $(CURDIR)/bootstrap.bmp "CTR-NDSForwarder;TWLNAND Booter;lifehackerhansol" -g FWDR 01 "TWLNFWDR-LHS" -u 00030005 -z 80040000
+	ndstool -c $@ -7 $(TARGET).arm7.elf -9 $(TARGET).arm9.elf -b $(CURDIR)/bootstrap.bmp "YANBF;TWLNAND Booter;lifehackerhansol" -g FWDR 01 "TWLNFWDR-LHS" -u 00030005 -z 80040000
 	make_cia --srl=$(TARGET).nds
 
 $(TARGET).arm7: arm7/$(TARGET).elf

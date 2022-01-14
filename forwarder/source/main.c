@@ -1,5 +1,5 @@
 /*
-CTR-NDSForwarder
+YANBF
 Copyright (C) 2022-present lifehackerhansol
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -56,7 +56,7 @@ int main() {
 	}
 
 	consoleInit(GFX_TOP, NULL);
-	printf("Failed to launch CIA.\n\nPlease reinstall bootstrap.cia from\nCTR-NDSForwarder release.\n\nPress START to exit.");
+	printf("Failed to launch CIA.\n\nPlease reinstall bootstrap.cia from\nYANBF release.\n\nPress START to exit.");
 	while (aptMainLoop()) {
 		gspWaitForVBlank();
 		gfxSwapBuffers();
