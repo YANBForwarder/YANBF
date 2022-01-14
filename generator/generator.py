@@ -121,7 +121,7 @@ else:
             bannertoolarg += f'-scl "{chn_title[0]} {chn_title[1]}" '
             bannertoolarg += f'-scp "{chn_title[2]}" '
         else:
-            bannertoolarg += f'-scs "{chn_title[0]}" -scl "{chn_title[0]} -scp "{chn_title[1]}" '
+            bannertoolarg += f'-scs "{chn_title[0]}" -scl "{chn_title[0]}" -scp "{chn_title[1]}" '
     if kor_title is not None:
         if haspublisher:
             bannertoolarg += f'-ks "{kor_title[0]} {kor_title[1]}" '
