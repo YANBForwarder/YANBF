@@ -29,8 +29,8 @@ import io
 import os
 import requests
 import unicodedata
-import PIL
 
+from libscrc import modbus
 from PIL import Image
 from struct import unpack
 from binascii import hexlify
@@ -48,6 +48,7 @@ cmdarg = ""
 if os.name != 'nt':
     cmdarg = "./"
 
+
 def die():
     files = ['data/icon.png',
              'data/banner.bin',
@@ -59,6 +60,7 @@ def die():
         except FileNotFoundError:
             continue
     exit()
+
 
 path = args.input[0]
 if not os.path.exists(os.path.abspath(path)):
@@ -80,11 +82,44 @@ else:
     banneraddrle = rom.read(4)
     banneraddr = unpack("<I", banneraddrle)[0]
     rom.seek(banneraddr, 0)
+    bannerversion = unpack("<H", rom.read(2))[0] & 3
+    langnum = 6
+    if bannerversion == 2:
+        langnum = 7
+    elif bannerversion == 3:
+        langnum = 8
+
+    # crc checking
+    rom.seek(banneraddr + 0x2)
+    crc083F = unpack("<H", rom.read(2))[0]
+    rom.seek(banneraddr + 0x20)
+    data = rom.read(0x840 - 0x20)
+    calcrc = modbus(data)
+    if crc083F != calcrc:
+        print(f"Banner version {bannerversion}. Banner CRC does not match. If this is a ROM hack, please contact the ROM hack developer.")
+        die()
+    if bannerversion >= 2:
+        rom.seek(banneraddr + 0x4)
+        crc093F = unpack("<H", rom.read(2))[0]
+        rom.seek(banneraddr + 0x20)
+        data = rom.read(0x940 - 0x20)
+        calcrc = modbus(data)
+        if crc093F == calcrc:
+            if bannerversion == 3:
+                rom.seek(banneraddr + 0x6)
+                crc0A3F = unpack("<H", rom.read(2))[0]
+                rom.seek(banneraddr + 0x20)
+                data = rom.read(0xA40 - 0x20)
+                calcrc = modbus(data)
+                if crc0A3F != calcrc:
+                    langnum = 7
+        else:
+            langnum = 6
     title = []
-    haspublisher = False
-    for x in range(8):
+    for x in range(langnum):
         offset = 0x240 + (0x100 * x)
         rom.seek(banneraddr + offset, 0)
+        print(len(title))
         title.append(str(rom.read(0x100), "utf-16-le"))
         title[x] = title[x].split('\0', 1)[0]
     jpn_title = title[0].split("\n")
@@ -93,18 +128,23 @@ else:
     ger_title = title[3].split("\n")
     ita_title = title[4].split("\n")
     spa_title = title[5].split("\n")
-    chn_title = title[6].split("\n")
-    kor_title = title[7].split("\n")
-    if chn_title == [""] or chn_title[0][0] == "\uffff":
-        chn_title = None
-    if kor_title == [""] or kor_title[0][0] == "\uffff":
-        kor_title = None
+    chn_title = None
+    kor_title = None
+    if langnum >= 7:
+        chn_title = title[6].split("\n")
+        if len(chn_title) == 1 or chn_title[0][0] == "\uffff":
+            chn_title = None
+    if langnum >= 8:
+        kor_title = title[7].split("\n")
+        if len(kor_title) == 1 or kor_title[0][0] == "\uffff":
+            kor_title = None
     rom.seek(0xC, 0)
     gamecode = str(rom.read(0x4), "ascii")
     rom.close()
 
     print("Creating SMDH...")
     bannertoolarg = f'{cmdarg}bannertool makesmdh -i "data/icon.png" '
+    haspublisher = False
     if len(jpn_title) == 3:
         haspublisher = True
     if haspublisher:

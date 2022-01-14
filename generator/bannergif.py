@@ -23,6 +23,7 @@ THE SOFTWARE.
 from PIL import Image
 import struct
 
+
 def bannergif(path=""):
     if path == "":
         return -1

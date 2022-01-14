@@ -21,10 +21,12 @@ dist:	forwarder bootstrap
 	@mkdir -p dist/generator/romfs
 
 	@cp -f bootstrap/bootstrap.cia 'dist/bootstrap.cia'
-	@cp -rf generator dist/
+	@cp -f generator/data/build-cia.rsf dist/generator/data/build-cia.rsf
+	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
+	@cp -f generator/*.py dist/generator
+	@cp -f generator/requirements.txt dist/generator/requirements.txt
 	@mv -f forwarder/forwarder.elf dist/generator/data/forwarder.elf
 	@cp -f README.md dist/README.md
-	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
 
 	@cd dist && zip -r ../YANBF.zip *
 
