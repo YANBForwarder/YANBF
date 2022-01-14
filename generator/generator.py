@@ -157,7 +157,7 @@ else:
 
     # CIA generation
     print("Getting filepath...")
-    romfs = open('romfs/path.txt', 'w')
+    romfs = open('romfs/path.txt', 'w', encoding="utf8")
     path = unicodedata.normalize("NFC", os.path.abspath(path))
     if os.name == 'nt':
         path = path[2:]
