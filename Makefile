@@ -19,16 +19,12 @@ all:	forwarder bootstrap dist
 dist:	forwarder bootstrap
 	@mkdir -p dist/generator/data
 	@mkdir -p dist/generator/romfs
-	@mkdir -p 'dist/for SD card root/_nds/'
-	@mkdir -p 'dist/for SD card root/cias'
 
-	@cp -f forwarder/forwarder.* dist
-	@cp -f bootstrap/bootstrap.cia 'dist/for SD card root/cias/bootstrap.cia'
+	@cp -f bootstrap/bootstrap.cia 'dist/bootstrap.cia'
 	@cp -f generator/generator.py dist/generator/generator.py
 	@cp -f generator/bannergif.py dist/generator/bannergif.py
 	@cp -f generator/data/build-cia.rsf dist/generator/data/build-cia.rsf
-	@mv -f dist/forwarder.elf dist/generator/data/forwarder.elf
-	@rm -f dist/forwarder.*
+	@mv -f forwarder/forwarder.elf dist/generator/data/forwarder.elf
 	@cp -f README.md dist/README.md
 	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
 

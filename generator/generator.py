@@ -1,13 +1,40 @@
+#!/usr/bin/env python3
+
+"""
+Copyright © 2022-present lifehackerhansol
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+"""
+
 import argparse
 import subprocess
+import io
 import os
 import requests
 import unicodedata
+import PIL
 
 from PIL import Image
 from struct import unpack
 from binascii import hexlify
 from bannergif import bannergif
+
 
 parser = argparse.ArgumentParser(description="CTR-NDSForwarder Generator")
 parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
@@ -20,19 +47,30 @@ cmdarg = ""
 if os.name != 'nt':
     cmdarg = "./"
 
-path = args.input[0]
-err = bannergif(path)
-print("Extracting icon...")
-if err != 0:
-    print("Failed to open ROM. Is the path valid?")
+def die():
+    files = ['data/icon.png',
+             'data/banner.bin',
+             'data/output.smdh',
+             'data/banner.png']
+    for file in files:
+        try:
+            os.remove(file)
+        except FileNotFoundError:
+            continue
     exit()
+
+path = args.input[0]
+if not os.path.exists(os.path.abspath(path)):
+    print("Failed to open ROM. Is the path valid?")
+    die()
 else:
+    print("Extracting icon...")
+    im = bannergif(path)
     print("Resizing icon...")
-    im = Image.open('output.gif')
     im.putpalette(b"\xFF\xFF\xFF" + im.palette.palette[3:])
     im = im.convert('RGB')
     im = im.resize((48, 48), resample=Image.LINEAR)
-    im.save('output.png')
+    im.save('data/icon.png')
 
     # get banner title
     print("Extracting game metadata...")
@@ -65,7 +103,7 @@ else:
     rom.close()
 
     print("Creating SMDH...")
-    bannertoolarg = f'{cmdarg}bannertool makesmdh -i "output.png" '
+    bannertoolarg = f'{cmdarg}bannertool makesmdh -i "data/icon.png" '
     if len(jpn_title) == 3:
         haspublisher = True
     if haspublisher:
@@ -90,12 +128,12 @@ else:
             bannertoolarg += f'-kp "{kor_title[2]}" '
         else:
             bannertoolarg += f'-ks "{kor_title[0]}" -kl "{kor_title[0]}" -kp "{kor_title[1]}" '
-    bannertoolarg += '-o "output.smdh"'
+    bannertoolarg += '-o "data/output.smdh"'
     bannertoolrun = subprocess.Popen(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     bannertoolrun.wait()
     if "Created SMDH" not in bannertoolrun.stdout.readline():
         print("Failed to run bannertool.")
-        exit()
+        die()
 
     # get boxart for DS, to make banner
     if not args.boxart:
@@ -128,16 +166,13 @@ else:
         r = requests.get(f"https://art.gametdb.com/ds/coverM/{ba_region}/{gamecode}.jpg")
         if r.status_code != 200:
             print("Cannot find box art for game. Are you connected to the internet?")
-            exit()
-        boxart = open('data/boxart.jpg', 'wb')
-        boxart.write(r.content)
-        boxart.close()
+            die()
     else:
         if not os.path.isfile(args.boxart[0]):
             print(f"{args.boxart[0]} does not exist. Is your argument correct?")
-            exit()
+            die()
     print("Resizing box art...")
-    banner = Image.open(args.boxart[0] if args.boxart else 'data/boxart.jpg')
+    banner = Image.open(args.boxart[0] if args.boxart else io.BytesIO(r.content))
     width, height = banner.size
     new_height = 128
     new_width = new_height * width // height
@@ -148,12 +183,12 @@ else:
     new_image.save('data/banner.png', 'PNG')
 
     print("Creating banner...")
-    bannertoolarg = f"{cmdarg}bannertool makebanner -i data/banner.png -a data/dsboot.wav -o banner.bin"
+    bannertoolarg = f"{cmdarg}bannertool makebanner -i data/banner.png -a data/dsboot.wav -o data/banner.bin"
     bannertoolrun = subprocess.Popen(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     bannertoolrun.wait()
     if "Created banner" not in bannertoolrun.stdout.readline():
         print("Failed to run bannertool.")
-        exit()
+        die()
 
     # CIA generation
     print("Getting filepath...")
@@ -177,13 +212,14 @@ else:
     gamecodehex = hexlify(gamecode.encode()).decode()
     gamecodehex = f"0x{gamecodehex[3:8]}"
     print("Running makerom...")
-    makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner banner.bin -icon output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
+    makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
     makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "
     makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{eng_title[0]}" -DAPP_UNIQUE_ID={gamecodehex}'
     makeromrun = subprocess.Popen(makeromarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     makeromrun.wait()
     if makeromrun.stdout.readline() != "":
         print("Failed to run makerom.")
-        exit()
+        die()
     print("CIA generated.")
-    exit()
+
+    die()

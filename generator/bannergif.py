@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-
-# Requirements:
-# pip3 install pillow
-
 """
 Copyright © 2021 Pk11
 
@@ -134,5 +129,4 @@ def bannergif(path=""):
         delays.append(max(frame["duration"] * 1000 // 60, 20))
 
     # Save output image
-    images[0].save("output.gif", save_all=True, append_images=images[1:], duration=delays, loop=0, optimize=False)
-    return 0
+    return images[0]
