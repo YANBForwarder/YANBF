@@ -46,7 +46,6 @@ jobs:
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-macos_x86_64.zip"
           unzip makerom-v0.18-macos_x86_64.zip
           mv -f makerom dist/generator/makerom
-          cp static/macos_bannertool dist/generator/bannertool
           chmod +x dist/generator/bannertool
           chmod +x dist/generator/makerom
           chmod +x dist/generator/generator.py
