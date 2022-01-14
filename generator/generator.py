@@ -200,7 +200,7 @@ else:
     else:
         temp = path
         orig_dev = os.stat(temp).st_dev
-        while path != '/':
+        while temp != '/':
             direc = os.path.dirname(temp)
             if os.stat(direc).st_dev != orig_dev:
                 break
