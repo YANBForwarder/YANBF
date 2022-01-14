@@ -6,6 +6,7 @@
 int main() {
 	romfsInit();
 	gfxInitDefault();
+	amInit();
 	mkdir("sdmc:/_nds", 0777);
 	mkdir("sdmc:/_nds/ntr-forwarder", 0777);
 	
@@ -21,18 +22,18 @@ int main() {
 			fclose(file);
 		}
 	}
- 
-    Result res = 0;
-
-    if(R_SUCCEEDED(res = APT_PrepareToDoApplicationJump(0, 0x0004800546574452, 0))) {
-        u8 param[0x300];
-        u8 hmac[0x20];
-
-        res = APT_DoApplicationJump(param, sizeof(param), hmac);
+	AM_TitleEntry bootstrap;
+	u64 tid = 0x0004800546574452;
+    if(R_SUCCEEDED(AM_GetTitleInfo(MEDIATYPE_NAND, 1, &tid, &bootstrap))) {
+        if(R_SUCCEEDED(APT_PrepareToDoApplicationJump(0, 0x0004800546574452, 0))) {
+        	u8 param[0x300];
+        	u8 hmac[0x20];
+        	APT_DoApplicationJump(param, sizeof(param), hmac);
+    	}
     }
 
 	consoleInit(GFX_TOP, NULL);
-	printf("Failed to launch CIA.\nPlease reinstall bootstrap.cia from CTR-NDSForwarder release.\nPress START to exit.");
+	printf("Failed to launch CIA.\n\nPlease reinstall bootstrap.cia from\nCTR-NDSForwarder release.\n\nPress START to exit.");
 	while (aptMainLoop()) {
 		gspWaitForVBlank();
 		gfxSwapBuffers();
@@ -42,6 +43,7 @@ int main() {
 		if (kDown & KEY_START)
 			break;
 	}
+	amExit();
 	gfxExit();
 	return 0;
 }
