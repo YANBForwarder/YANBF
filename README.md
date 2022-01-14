@@ -4,17 +4,19 @@ Yet Another nds-bootstrap Forwarder
 nds-bootstrap forwarder template that is installed as a 3DS homebrew, to allow for more than 40 forwarders.
 
 How to use:
-  1. Download release zip
-  1. Download [SD Forwarder Pack](https://github.com/RocketRobz/NTR_Forwarder/releases)
-  1. Extract both zips
-  1. Get Python 3 for your PC
-  1. Copy all files in `for SD card root` in SD forwarder pack to SD root
-  1. Copy `bootstrap.cia` to SD root
-  1. `pip install Pillow requests`
-  1. `python3 generator.py <path to ROM on SD>`
-  1. Copy the new `.cia` to SD root
-  1. Insert SD, then boot, then FBI
-  1. Install all CIAs that were copied
+1. Install Python 3 for your PC: http://python.org/downloads
+1. Go to https://github.com/lifehackerhansol/YANBF/releases, and download the appropriate zip file for your PC OS
+1. Go to https://github.com/RocketRobz/NTR_Forwarder/releases, and download the zip file that is not the source code
+1. Extract the zip files
+1. From the DS Game Forwarder Pack, copy everything in the for SD card root folder to your SD card root
+1. From YANBF, copy bootstrap.cia to your SD card root
+1. Open a terminal or command prompt and cd inside the generator folder
+1. Run pip install -r requirements.txt
+1. Run python3 generator.py <path to ROM on your SD card>
+    - Make sure to replace <path to ROM on your SD card> with the full path to your ROM
+    - this ROM MUST BE ON YOUR SD CARD! It will fail to generate properly otherwise!
+1. An output.cia will be generated. Copy this to your SD card
+1. Boot your 3DS and install both CIAs using FBI
 
 To build:
   1. edit `romFS:/path.txt` to any file path in `sd:/`. Do NOT end with newline, this kills it.
