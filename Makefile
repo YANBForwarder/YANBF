@@ -21,9 +21,7 @@ dist:	forwarder bootstrap
 	@mkdir -p dist/generator/romfs
 
 	@cp -f bootstrap/bootstrap.cia 'dist/bootstrap.cia'
-	@cp -f generator/generator.py dist/generator/generator.py
-	@cp -f generator/bannergif.py dist/generator/bannergif.py
-	@cp -f generator/data/build-cia.rsf dist/generator/data/build-cia.rsf
+	@cp -rf generator dist/
 	@mv -f forwarder/forwarder.elf dist/generator/data/forwarder.elf
 	@cp -f README.md dist/README.md
 	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
