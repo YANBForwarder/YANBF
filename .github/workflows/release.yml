@@ -75,3 +75,4 @@ jobs:
             YANBF-Windows.zip
             YANBF-macOS.zip
             YANBF-Linux.zip
+            dist/bootstrap.cia
