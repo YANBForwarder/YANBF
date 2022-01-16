@@ -41,7 +41,7 @@ jobs:
           wget "https://github.com/Olmectron/Simple-Web-App-GUI-for-YANBF-Generator/releases/download/v1.0.3/yanbf-gui-1.0.3-windows-x64.exe"
           mv -f yanbf-gui-1.0.3-windows-x64.exe dist/generator/yanbf-gui-1.0.3.exe
           cd dist && zip -r ../YANBF-Windows.zip *
-          rm -rf generator/makerom.exe generator/bannertool.exe generator/ganbf-gui-1.0.3.exe
+          rm -rf generator/makerom.exe generator/bannertool.exe generator/yanbf-gui-1.0.3.exe
       - name: Create zip for macOS
         run: |
           cp mac-x86_64/bannertool dist/generator/bannertool
