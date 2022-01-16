@@ -38,25 +38,31 @@ jobs:
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-win_x86_64.zip"
           unzip makerom-v0.18-win_x86_64.zip
           mv -f makerom.exe dist/generator/makerom.exe
+          wget "https://github.com/Olmectron/Simple-Web-App-GUI-for-YANBF-Generator/releases/download/v1.0.3/yanbf-gui-1.0.3-windows-x64.exe"
+          mv -f yanbf-gui-1.0.3-windows-x64.exe dist/generator/yanbf-gui-1.0.3.exe
           cd dist && zip -r ../YANBF-Windows.zip *
-          rm -rf generator/makerom.exe generator/bannertool.exe
+          rm -rf generator/makerom.exe generator/bannertool.exe generator/ganbf-gui-1.0.3.exe
       - name: Create zip for macOS
         run: |
           cp mac-x86_64/bannertool dist/generator/bannertool
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-macos_x86_64.zip"
           unzip makerom-v0.18-macos_x86_64.zip
           mv -f makerom dist/generator/makerom
+          wget "https://github.com/Olmectron/Simple-Web-App-GUI-for-YANBF-Generator/releases/download/v1.0.3/yanbf-gui-1.0.3-osx.dmg"
+          mv -f yanbf-gui-1.0.3-osx.dmg dist/generator/yanbf-gui-1.0.3.dmg
           chmod +x dist/generator/bannertool
           chmod +x dist/generator/makerom
           chmod +x dist/generator/generator.py
           cd dist && zip -r ../YANBF-macOS.zip *
-          rm -rf generator/makerom generator/bannertool
+          rm -rf generator/makerom generator/bannertool generator/yanbf-gui-1.0.3.dmg
       - name: Create zip for Linux
         run: |
           cp linux-x86_64/bannertool dist/generator/bannertool
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-ubuntu_x86_64.zip"
           unzip makerom-v0.18-ubuntu_x86_64.zip
           mv -f makerom dist/generator/makerom
+          wget "https://github.com/Olmectron/Simple-Web-App-GUI-for-YANBF-Generator/releases/download/v1.0.3/yanbf-gui-1.0.3-linux.AppImage"
+          mv -f yanbf-gui-1.0.3-linux.AppImage dist/generator/yanbf-gui-1.0.3.AppImage
           chmod +x dist/generator/makerom
           chmod +x dist/generator/bannertool
           chmod +x dist/generator/generator.py
