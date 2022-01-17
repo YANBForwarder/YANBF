@@ -27,8 +27,6 @@
 #include <limits.h>
 #include <nds/disc_io.h>
 
-#include <string>
-#include <vector>
 #include <string.h>
 #include <unistd.h>
 
@@ -58,10 +56,16 @@ int main(int argc, char **argv) {
 			consoleDemoInit();
 			iprintf("Failed. Unknown\n");
 		} else {
-			vector<char*> argarray;
-			argarray.push_back((char*)"sd:/_nds/ntr-forwarder/sdcard.nds");
-			argarray.push_back(path);
-			int err = runNdsFile(argarray[0], argarray.size(), (const char **)&argarray[0]);
+			char titleId[6];
+			memcpy(titleId, (const char *)0x02FFE000 + offsetof(tDSiHeader, tid_low), 4); // TID Low
+			titleId[4] = *(const char *)(0x02FFE000 + offsetof(tDSiHeader, tid_high)); // Important byte of TID high
+			titleId[5] = 0;
+			const char *argarray[3] = {
+				"sd:/_nds/ntr-forwarder/sdcard.nds",
+				path,
+				titleId
+			};
+			int err = runNdsFile(argarray[0], sizeof(argarray) / sizeof(argarray[0]), argarray);
 
 			consoleDemoInit();
 			iprintf("Start failed. Error %i\n", err);
