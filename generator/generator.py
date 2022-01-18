@@ -119,6 +119,12 @@ else:
     ger_title = title[3].split("\n")
     ita_title = title[4].split("\n")
     spa_title = title[5].split("\n")
+    print(eng_title)
+    print(jpn_title)
+    print(fra_title)
+    print(ger_title)
+    print(ita_title)
+    print(spa_title)
     chn_title = None
     kor_title = None
     if langnum >= 7:
@@ -136,28 +142,53 @@ else:
     print("Creating SMDH...")
     bannertoolarg = f'{cmdarg}bannertool makesmdh -i "data/icon.png" '
     haspublisher = False
-    if len(jpn_title) == 3:
-        haspublisher = True
+
+    haspublisher = (len(eng_title) == 3)
     if haspublisher:
-        bannertoolarg += f'-s "{eng_title[0]} {eng_title[1]}" -js "{jpn_title[0]} {jpn_title[1]}" -fs "{fra_title[0]} {fra_title[1]}" -gs "{fra_title[0]} {ger_title[1]}" -is "{ita_title[0]} {ita_title[1]}" -ss "{spa_title[0]} {spa_title[1]}" '
-        bannertoolarg += f'-l "{eng_title[0]} {eng_title[1]}" -jl "{jpn_title[0]} {jpn_title[1]}" -fl "{fra_title[0]} {fra_title[1]}" -gl "{fra_title[0]} {ger_title[1]}" -il "{ita_title[0]} {ita_title[1]}" -sl "{spa_title[0]} {spa_title[1]}" '
-        bannertoolarg += f'-p "{eng_title[2]}" -jp "{jpn_title[2]}" -fp "{fra_title[2]}" -gp "{ger_title[2]}" -ip "{ita_title[2]}" -sp "{spa_title[2]}" '
+        bannertoolarg += f'-s "{eng_title[0]} {eng_title[1]}" -l "{eng_title[0]} {eng_title[1]}" -p "{eng_title[2]}" '
     else:
-        bannertoolarg += f'-s "{eng_title[0]}" -js "{jpn_title[0]}" -fs "{fra_title[0]}" -gs "{fra_title[0]}" -is "{ita_title[0]}" -ss "{spa_title[0]}" '
-        bannertoolarg += f'-l "{eng_title[0]}" -jl "{jpn_title[0]}" -fl "{fra_title[0]}" -gl "{ger_title[0]}" -il "{ita_title[0]}" -sl "{spa_title[0]}" '
-        bannertoolarg += f'-p "{eng_title[1]}" -jp "{jpn_title[1]}" -fp "{fra_title[1]}" -gp "{ger_title[1]}" -ip "{ita_title[1]}" -sp "{spa_title[1]}" '
+        bannertoolarg += f'-s "{eng_title[0]}" -l "{eng_title[0]}" -p "{eng_title[1]}" '
+
+    haspublisher = (len(jpn_title) == 3)
+    if haspublisher:
+        bannertoolarg += f'-js "{jpn_title[0]} {jpn_title[1]}" -jl "{jpn_title[0]} {jpn_title[1]}" -jp "{jpn_title[2]}" '
+    else:
+        bannertoolarg += f'-js "{jpn_title[0]}" -jl "{jpn_title[0]}" -jp "{jpn_title[1]}" '
+
+    haspublisher = (len(fra_title) == 3)
+    if haspublisher:
+        bannertoolarg += f'-fs "{fra_title[0]} {fra_title[1]}" -fl "{fra_title[0]} {fra_title[1]}" -fp "{fra_title[2]}" '
+    else:
+        bannertoolarg += f'-fs "{fra_title[0]}" -fl "{fra_title[0]}" -fp "{fra_title[1]}" '
+
+    haspublisher = (len(ger_title) == 3)
+    if haspublisher:
+        bannertoolarg += f'-gs "{ger_title[0]} {ger_title[1]}" -gl "{ger_title[0]} {ger_title[1]}" -gp "{ger_title[2]}" '
+    else:
+        bannertoolarg += f'-gs "{ger_title[0]}" -gl "{ger_title[0]}" -gp "{ger_title[1]}" '
+
+    haspublisher = (len(ita_title) == 3)
+    if haspublisher:
+        bannertoolarg += f'-is "{ita_title[0]} {ita_title[1]}" -il "{ita_title[0]} {ita_title[1]}" -ip "{ita_title[2]}" '
+    else:
+        bannertoolarg += f'-is "{ita_title[0]}" -il "{ita_title[0]}" -ip "{ita_title[1]}" '
+
+    haspublisher = (len(spa_title) == 3)
+    if haspublisher:
+        bannertoolarg += f'-ss "{spa_title[0]} {spa_title[1]}" -sl "{spa_title[0]} {spa_title[1]}" -sp "{spa_title[2]}" '
+    else:
+        bannertoolarg += f'-ss "{spa_title[0]}" -sl "{spa_title[0]}" -sp "{spa_title[1]}" '
+
     if chn_title is not None:
+        haspublisher = (len(chn_title) == 3)
         if haspublisher:
-            bannertoolarg += f'-scs "{chn_title[0]} {chn_title[1]}" '
-            bannertoolarg += f'-scl "{chn_title[0]} {chn_title[1]}" '
-            bannertoolarg += f'-scp "{chn_title[2]}" '
+            bannertoolarg += f'-scs "{chn_title[0]} {chn_title[1]}" -scl "{chn_title[0]} {chn_title[1]}" -scp "{chn_title[2]}" '
         else:
             bannertoolarg += f'-scs "{chn_title[0]}" -scl "{chn_title[0]}" -scp "{chn_title[1]}" '
     if kor_title is not None:
+        haspublisher = (len(kor_title) == 3)
         if haspublisher:
-            bannertoolarg += f'-ks "{kor_title[0]} {kor_title[1]}" '
-            bannertoolarg += f'-kl "{kor_title[0]} {kor_title[1]}" '
-            bannertoolarg += f'-kp "{kor_title[2]}" '
+            bannertoolarg += f'-ks "{kor_title[0]} {kor_title[1]}" -kl "{kor_title[0]} {kor_title[1]}" -kp "{kor_title[2]}" '
         else:
             bannertoolarg += f'-ks "{kor_title[0]}" -kl "{kor_title[0]}" -kp "{kor_title[1]}" '
     bannertoolarg += '-o "data/output.smdh"'
