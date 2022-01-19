@@ -45,10 +45,10 @@ void stop (void) {
 //---------------------------------------------------------------------------------
 int main(int argc, char **argv) {
 //---------------------------------------------------------------------------------
-	if (fatInitDefault()) {
-		FILE* headerFile = fopen("sd:/_nds/ntr-forwarder/header.bin", "wb");
-		fwrite(__DSiHeader, 1, 0x1000, headerFile);
-		fclose(headerFile);
+	if (!fatInitDefault()) {
+		consoleDemoInit();
+		iprintf("fatinitDefault failed!");
+	} else {
 
 		FILE* pathtxt = fopen("/_nds/ntr-forwarder/path.txt", "r");
 		char path[PATH_MAX];
@@ -79,9 +79,6 @@ int main(int argc, char **argv) {
 				iprintf("ntr-forwarder\"");
 			}
 		}
-	} else {
-		consoleDemoInit();
-		iprintf("fatinitDefault failed!");
 	}
 
 	iprintf("\n");		
