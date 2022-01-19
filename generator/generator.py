@@ -61,6 +61,32 @@ def die():
             continue
     exit()
 
+
+def get_title(rom, langnum: int) -> dict:
+    title = []
+    titles = {
+    }
+    for x in range(langnum):
+        offset = 0x240 + (0x100 * x)
+        rom.seek(banneraddr + offset, 0)
+        title.append(str(rom.read(0x100), "utf-16-le"))
+        title[x] = title[x].split('\0', 1)[0]
+    titles['jpn'] = title[0].split('\n')
+    titles['eng'] = title[1].split('\n')
+    titles['fra'] = title[2].split('\n')
+    titles['ger'] = title[3].split('\n')
+    titles['ita'] = title[4].split('\n')
+    titles['spa'] = title[5].split('\n')
+    if langnum >= 7:
+        titles['chn'] = title[6].split("\n")
+    if langnum >= 8:
+        titles['kor'] = title[7].split("\n")
+    for lang in titles:
+        if len(titles[lang]) == 1:
+            titles[lang] = None
+    return titles
+
+
 path = args.input[0]
 if not os.path.exists(os.path.abspath(path)):
     print("Failed to open ROM. Is the path valid?")
@@ -106,102 +132,60 @@ else:
                 calcrc = modbus(data)
                 if crc0A3F != calcrc:
                     langnum = 7
-    title = []
-    for x in range(langnum):
-        offset = 0x240 + (0x100 * x)
-        rom.seek(banneraddr + offset, 0)
-        title.append(str(rom.read(0x100), "utf-16-le"))
-        title[x] = title[x].split('\0', 1)[0]
-    jpn_title = title[0]
-    if len(jpn_title) == 1:
-        jpn_title = None
-    eng_title = title[1]
-    if len(eng_title) == 1:
-        eng_title = None
-    fra_title = title[2]
-    if len(fra_title) == 1:
-        fra_title = None
-    ger_title = title[3]
-    if len(ger_title) == 1:
-        ger_title = None
-    ita_title = title[4]
-    if len(ita_title) == 1:
-        ita_title = None
-    spa_title = title[5]
-    if len(spa_title) == 1:
-        spa_title = None
-    chn_title = None
-    if langnum >= 7:
-        chn_title = title[6].split("\n")
-        if len(chn_title) == 1:
-            chn_title = None
-    kor_title = None
-    if langnum >= 8:
-        kor_title = None
-        kor_title = title[7].split("\n")
-        if len(kor_title) == 1:
-            kor_title = None
+    title: dict = get_title(rom, langnum)
     rom.seek(0xC, 0)
     gamecode = str(rom.read(0x4), "ascii")
     rom.close()
 
     print("Creating SMDH...")
     bannertoolarg = f'{cmdarg}bannertool makesmdh -i "data/icon.png" '
-    haspublisher = False
 
-    haspublisher = (len(eng_title) == 3)
-    if haspublisher:
-        bannertoolarg += f'-s "{eng_title[0]} {eng_title[1]}" -l "{eng_title[0]} {eng_title[1]}" -p "{eng_title[2]}" '
+    if len(title['eng']) == 3:
+        bannertoolarg += f'-s "{title["eng"][0]} {title["eng"][1]}" -l "{title["eng"][0]} {title["eng"][1]}" -p "{title["eng"][2]}" '
     else:
-        bannertoolarg += f'-s "{eng_title[0]}" -l "{eng_title[0]}" -p "{eng_title[1]}" '
+        bannertoolarg += f'-s "{title["eng"][0]}" -l "{title["eng"][0]}" -p "{title["eng"][1]}" '
 
-    if jpn_title is not None:
-        haspublisher = (len(jpn_title) == 3)
-        if haspublisher:
-            bannertoolarg += f'-js "{jpn_title[0]} {jpn_title[1]}" -jl "{jpn_title[0]} {jpn_title[1]}" -jp "{jpn_title[2]}" '
+    if title['jpn'] is not None:
+        if len(title['jpn']) == 3:
+            bannertoolarg += f'-js "{title["jpn"][0]} {title["jpn"][1]}" -jl "{title["jpn"][0]} {title["jpn"][1]}" -jp "{title["jpn"][2]}" '
         else:
-            bannertoolarg += f'-js "{jpn_title[0]}" -jl "{jpn_title[0]}" -jp "{jpn_title[1]}" '
+            bannertoolarg += f'-js "{title["jpn"][0]}" -jl "{title["jpn"][0]}" -jp "{title["jpn"][1]}" '
 
-    if fra_title is not None:
-        haspublisher = (len(fra_title) == 3)
-        if haspublisher:
-            bannertoolarg += f'-fs "{fra_title[0]} {fra_title[1]}" -fl "{fra_title[0]} {fra_title[1]}" -fp "{fra_title[2]}" '
+    if title['fra'] is not None:
+        if len(title['fra']) == 3:
+            bannertoolarg += f'-fs "{title["fra"][0]} {title["fra"][1]}" -fl "{title["fra"][0]} {title["fra"][1]}" -fp "{title["fra"][2]}" '
         else:
-            bannertoolarg += f'-fs "{fra_title[0]}" -fl "{fra_title[0]}" -fp "{fra_title[1]}" '
+            bannertoolarg += f'-fs "{title["fra"][0]}" -fl "{title["fra"][0]}" -fp "{title["fra"][1]}" '
 
-    if ger_title is not None:
-        haspublisher = (len(ger_title) == 3)
-        if haspublisher:
-            bannertoolarg += f'-gs "{ger_title[0]} {ger_title[1]}" -gl "{ger_title[0]} {ger_title[1]}" -gp "{ger_title[2]}" '
+    if title['ger'] is not None:
+        if len(title['ger']) == 3:
+            bannertoolarg += f'-gs "{title["ger"][0]} {title["ger"][1]}" -gl "{title["ger"][0]} {title["ger"][1]}" -gp "{title["ger"][2]}" '
         else:
-            bannertoolarg += f'-gs "{ger_title[0]}" -gl "{ger_title[0]}" -gp "{ger_title[1]}" '
+            bannertoolarg += f'-gs "{title["ger"][0]}" -gl "{title["ger"][0]}" -gp "{title["ger"][1]}" '
 
-    if ita_title is not None:
-        haspublisher = (len(ita_title) == 3)
-        if haspublisher:
-            bannertoolarg += f'-is "{ita_title[0]} {ita_title[1]}" -il "{ita_title[0]} {ita_title[1]}" -ip "{ita_title[2]}" '
+    if title['ita'] is not None:
+        if len(title['ita']) == 3:
+            bannertoolarg += f'-is "{title["ita"][0]} {title["ita"][1]}" -il "{title["ita"][0]} {title["ita"][1]}" -ip "{title["ita"][2]}" '
         else:
-            bannertoolarg += f'-is "{ita_title[0]}" -il "{ita_title[0]}" -ip "{ita_title[1]}" '
+            bannertoolarg += f'-is "{title["ita"][0]}" -il "{title["ita"][0]}" -ip "{title["ita"][1]}" '
 
-    if spa_title is not None:
-        haspublisher = (len(spa_title) == 3)
-        if haspublisher:
-            bannertoolarg += f'-ss "{spa_title[0]} {spa_title[1]}" -sl "{spa_title[0]} {spa_title[1]}" -sp "{spa_title[2]}" '
+    if title['spa'] is not None:
+        if len(title['spa']) == 3:
+            bannertoolarg += f'-ss "{title["spa"][0]} {title["spa"][1]}" -sl "{title["spa"][0]} {title["spa"][1]}" -sp "{title["spa"][2]}" '
         else:
-            bannertoolarg += f'-ss "{spa_title[0]}" -sl "{spa_title[0]}" -sp "{spa_title[1]}" '
+            bannertoolarg += f'-ss "{title["spa"][0]}" -sl "{title["spa"][0]}" -sp "{title["spa"][1]}" '
 
-    if chn_title is not None:
-        haspublisher = (len(chn_title) == 3)
-        if haspublisher:
-            bannertoolarg += f'-scs "{chn_title[0]} {chn_title[1]}" -scl "{chn_title[0]} {chn_title[1]}" -scp "{chn_title[2]}" '
-        else:
-            bannertoolarg += f'-scs "{chn_title[0]}" -scl "{chn_title[0]}" -scp "{chn_title[1]}" '
-    if kor_title is not None:
-        haspublisher = (len(kor_title) == 3)
-        if haspublisher:
-            bannertoolarg += f'-ks "{kor_title[0]} {kor_title[1]}" -kl "{kor_title[0]} {kor_title[1]}" -kp "{kor_title[2]}" '
-        else:
-            bannertoolarg += f'-ks "{kor_title[0]}" -kl "{kor_title[0]}" -kp "{kor_title[1]}" '
+    if 'chn' in title and title['chn'] is not None:
+            if len(title['chn']) == 3:
+                bannertoolarg += f'-scs "{title["chn"][0]} {title["chn"][1]}" -scl "{title["chn"][0]} {title["chn"][1]}" -scp "{title["chn"][2]}" '
+            else:
+                bannertoolarg += f'-scs "{title["chn"][0]}" -scl "{title["chn"][0]}" -scp "{title["chn"][1]}" '
+
+    if 'kor' in title and title['kor'] is not None:
+            if len(title['kor']) == 3:
+                bannertoolarg += f'-ks "{title["kor"][0]} {title["kor"][1]}" -kl "{title["kor"][0]} {title["kor"][1]}" -kp "{title["kor"][2]}" '
+            else:
+                bannertoolarg += f'-ks "{title["kor"][0]}" -kl "{title["kor"][0]}" -kp "{title["kor"][1]}" '
 
     bannertoolarg += '-o "data/output.smdh"'
     bannertoolrun = subprocess.run(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
@@ -293,7 +277,7 @@ else:
     print("Running makerom...")
     makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
     makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "
-    makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{eng_title[0]}" -DAPP_UNIQUE_ID={gamecodehex}'
+    makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{title["eng"][0]}" -DAPP_UNIQUE_ID={gamecodehex}'
     makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
     if makeromrun.returncode != 0:
         print(makeromrun.stdout)
