@@ -61,7 +61,6 @@ def die():
             continue
     exit()
 
-
 path = args.input[0]
 if not os.path.exists(os.path.abspath(path)):
     print("Failed to open ROM. Is the path valid?")
@@ -113,27 +112,34 @@ else:
         rom.seek(banneraddr + offset, 0)
         title.append(str(rom.read(0x100), "utf-16-le"))
         title[x] = title[x].split('\0', 1)[0]
-    jpn_title = title[0].split("\n")
-    eng_title = title[1].split("\n")
-    fra_title = title[2].split("\n")
-    ger_title = title[3].split("\n")
-    ita_title = title[4].split("\n")
-    spa_title = title[5].split("\n")
-    print(eng_title)
-    print(jpn_title)
-    print(fra_title)
-    print(ger_title)
-    print(ita_title)
-    print(spa_title)
+    jpn_title = title[0]
+    if len(jpn_title) == 1:
+        jpn_title = None
+    eng_title = title[1]
+    if len(eng_title) == 1:
+        eng_title = None
+    fra_title = title[2]
+    if len(fra_title) == 1:
+        fra_title = None
+    ger_title = title[3]
+    if len(ger_title) == 1:
+        ger_title = None
+    ita_title = title[4]
+    if len(ita_title) == 1:
+        ita_title = None
+    spa_title = title[5]
+    if len(spa_title) == 1:
+        spa_title = None
     chn_title = None
-    kor_title = None
     if langnum >= 7:
         chn_title = title[6].split("\n")
-        if len(chn_title) == 1 or chn_title[0][0] == "\uffff":
+        if len(chn_title) == 1:
             chn_title = None
+    kor_title = None
     if langnum >= 8:
+        kor_title = None
         kor_title = title[7].split("\n")
-        if len(kor_title) == 1 or kor_title[0][0] == "\uffff":
+        if len(kor_title) == 1:
             kor_title = None
     rom.seek(0xC, 0)
     gamecode = str(rom.read(0x4), "ascii")
@@ -149,35 +155,40 @@ else:
     else:
         bannertoolarg += f'-s "{eng_title[0]}" -l "{eng_title[0]}" -p "{eng_title[1]}" '
 
-    haspublisher = (len(jpn_title) == 3)
-    if haspublisher:
-        bannertoolarg += f'-js "{jpn_title[0]} {jpn_title[1]}" -jl "{jpn_title[0]} {jpn_title[1]}" -jp "{jpn_title[2]}" '
-    else:
-        bannertoolarg += f'-js "{jpn_title[0]}" -jl "{jpn_title[0]}" -jp "{jpn_title[1]}" '
+    if jpn_title is not None:
+        haspublisher = (len(jpn_title) == 3)
+        if haspublisher:
+            bannertoolarg += f'-js "{jpn_title[0]} {jpn_title[1]}" -jl "{jpn_title[0]} {jpn_title[1]}" -jp "{jpn_title[2]}" '
+        else:
+            bannertoolarg += f'-js "{jpn_title[0]}" -jl "{jpn_title[0]}" -jp "{jpn_title[1]}" '
 
-    haspublisher = (len(fra_title) == 3)
-    if haspublisher:
-        bannertoolarg += f'-fs "{fra_title[0]} {fra_title[1]}" -fl "{fra_title[0]} {fra_title[1]}" -fp "{fra_title[2]}" '
-    else:
-        bannertoolarg += f'-fs "{fra_title[0]}" -fl "{fra_title[0]}" -fp "{fra_title[1]}" '
+    if fra_title is not None:
+        haspublisher = (len(fra_title) == 3)
+        if haspublisher:
+            bannertoolarg += f'-fs "{fra_title[0]} {fra_title[1]}" -fl "{fra_title[0]} {fra_title[1]}" -fp "{fra_title[2]}" '
+        else:
+            bannertoolarg += f'-fs "{fra_title[0]}" -fl "{fra_title[0]}" -fp "{fra_title[1]}" '
 
-    haspublisher = (len(ger_title) == 3)
-    if haspublisher:
-        bannertoolarg += f'-gs "{ger_title[0]} {ger_title[1]}" -gl "{ger_title[0]} {ger_title[1]}" -gp "{ger_title[2]}" '
-    else:
-        bannertoolarg += f'-gs "{ger_title[0]}" -gl "{ger_title[0]}" -gp "{ger_title[1]}" '
+    if ger_title is not None:
+        haspublisher = (len(ger_title) == 3)
+        if haspublisher:
+            bannertoolarg += f'-gs "{ger_title[0]} {ger_title[1]}" -gl "{ger_title[0]} {ger_title[1]}" -gp "{ger_title[2]}" '
+        else:
+            bannertoolarg += f'-gs "{ger_title[0]}" -gl "{ger_title[0]}" -gp "{ger_title[1]}" '
 
-    haspublisher = (len(ita_title) == 3)
-    if haspublisher:
-        bannertoolarg += f'-is "{ita_title[0]} {ita_title[1]}" -il "{ita_title[0]} {ita_title[1]}" -ip "{ita_title[2]}" '
-    else:
-        bannertoolarg += f'-is "{ita_title[0]}" -il "{ita_title[0]}" -ip "{ita_title[1]}" '
+    if ita_title is not None:
+        haspublisher = (len(ita_title) == 3)
+        if haspublisher:
+            bannertoolarg += f'-is "{ita_title[0]} {ita_title[1]}" -il "{ita_title[0]} {ita_title[1]}" -ip "{ita_title[2]}" '
+        else:
+            bannertoolarg += f'-is "{ita_title[0]}" -il "{ita_title[0]}" -ip "{ita_title[1]}" '
 
-    haspublisher = (len(spa_title) == 3)
-    if haspublisher:
-        bannertoolarg += f'-ss "{spa_title[0]} {spa_title[1]}" -sl "{spa_title[0]} {spa_title[1]}" -sp "{spa_title[2]}" '
-    else:
-        bannertoolarg += f'-ss "{spa_title[0]}" -sl "{spa_title[0]}" -sp "{spa_title[1]}" '
+    if spa_title is not None:
+        haspublisher = (len(spa_title) == 3)
+        if haspublisher:
+            bannertoolarg += f'-ss "{spa_title[0]} {spa_title[1]}" -sl "{spa_title[0]} {spa_title[1]}" -sp "{spa_title[2]}" '
+        else:
+            bannertoolarg += f'-ss "{spa_title[0]}" -sl "{spa_title[0]}" -sp "{spa_title[1]}" '
 
     if chn_title is not None:
         haspublisher = (len(chn_title) == 3)
@@ -191,6 +202,7 @@ else:
             bannertoolarg += f'-ks "{kor_title[0]} {kor_title[1]}" -kl "{kor_title[0]} {kor_title[1]}" -kp "{kor_title[2]}" '
         else:
             bannertoolarg += f'-ks "{kor_title[0]}" -kl "{kor_title[0]}" -kp "{kor_title[1]}" '
+
     bannertoolarg += '-o "data/output.smdh"'
     bannertoolrun = subprocess.run(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     if bannertoolrun.returncode != 0:
