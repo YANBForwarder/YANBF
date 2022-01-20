@@ -242,8 +242,7 @@ else:
     new_image.save('data/banner.png', 'PNG')
 
     print("Creating banner...")
-    bannertoolarg = f"{cmdarg}bannertool makebanner -i data/banner.png -a data/dsboot.wav -o data/banner.bin"
-    bannertoolrun = subprocess.run(bannertoolarg, shell=True, capture_output=True, universal_newlines=True)
+    bannertoolrun = subprocess.run(f"{cmdarg}bannertool makebanner -i data/banner.png -a data/dsboot.wav -o data/banner.bin", shell=True, capture_output=True, universal_newlines=True)
     if bannertoolrun.returncode != 0:
         print(bannertoolrun.stdout)
         print(bannertoolrun.stderr)
@@ -276,7 +275,10 @@ else:
     gamecodehex = f"0x{gamecodehex[3:8]}"
     print("Running makerom...")
     makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
-    makeromarg += f"-o {args.output[0] if args.output else 'output.cia'} "
+    if args.output:
+        makeromarg += f'-o "{args.output[0]}" '
+    else:
+        makeromarg += '-o "output.cia" '
     makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{title["eng"][0]}" -DAPP_UNIQUE_ID={gamecodehex}'
     makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
     if makeromrun.returncode != 0:
