@@ -271,15 +271,15 @@ else:
     romfs.write(f"sd:{path}")
     romfs.close()
 
-    gamecodehex = hexlify(gamecode.encode()).decode()
-    gamecodehex = f"0x{gamecodehex[3:8]}"
+    gamecodeint = int(hexlify(gamecode.encode()).decode(), 16)
+    uniqueid = f"0x{hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]}"
     print("Running makerom...")
     makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
     if args.output:
         makeromarg += f'-o "{args.output[0]}" '
     else:
         makeromarg += '-o "output.cia" '
-    makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{title["eng"][0]}" -DAPP_UNIQUE_ID={gamecodehex}'
+    makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{title["eng"][0]}" -DAPP_UNIQUE_ID={uniqueid}'
     makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
     if makeromrun.returncode != 0:
         print(makeromrun.stdout)
