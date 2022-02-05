@@ -22,3 +22,5 @@ universal/data
 universal/bootloader/build
 generator/romfs/path.txt
 generator/output
+generator/bannertool
+generator/makerom

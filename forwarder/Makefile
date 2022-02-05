@@ -38,7 +38,7 @@ DATA		:=	data
 INCLUDES	:=	include
 GRAPHICS	:=	gfx
 GFXBUILD	:=	$(BUILD)
-ROMFS		:=	romfs
+#ROMFS		:=	romfs
 #GFXBUILD	:=	$(ROMFS)/gfx
 
 #---------------------------------------------------------------------------------
@@ -180,7 +180,7 @@ endif
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(GFXBUILD)
+	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(TARGET).bin $(GFXBUILD)
 
 #---------------------------------------------------------------------------------
 $(GFXBUILD)/%.t3x	$(BUILD)/%.h	:	%.t3s
@@ -195,7 +195,11 @@ else
 # main targets
 #---------------------------------------------------------------------------------
 
-$(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS)
+$(OUTPUT).cia	:	$(OUTPUT).3dsx
+	makerom -f cia -target t -exefslogo -rsf ../generator/data/build-cia.rsf -elf $(OUTPUT).elf -banner data/banner.bin -icon data/output.smdh -major 0 -minor 4 -micro 0 -DAPP_VERSION_MAJOR=0 
+	ctrtool --content
+
+$(OUTPUT).3dsx	:	$(OUTPUT).elf $(OUTPUT).bin $(_3DSXDEPS)
 
 $(OFILES_SOURCES) : $(HFILES)
 

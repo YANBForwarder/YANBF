@@ -18,14 +18,13 @@ all:	forwarder bootstrap dist
 
 dist:	forwarder bootstrap
 	@mkdir -p dist/generator/data
-	@mkdir -p dist/generator/romfs
 
 	@cp -f bootstrap/bootstrap.cia 'dist/bootstrap.cia'
 	@cp -f generator/data/build-cia.rsf dist/generator/data/build-cia.rsf
 	@cp -f generator/data/dsboot.wav dist/generator/data/dsboot.wav
 	@cp -f generator/*.py dist/generator
 	@cp -f generator/requirements.txt dist/generator/requirements.txt
-	@mv -f forwarder/forwarder.elf dist/generator/data/forwarder.elf
+	@mv -f forwarder/forwarder.bin dist/generator/data/forwarder.bin
 	@cp -f README.md dist/README.md
 
 	@cd dist && zip -r ../YANBF.zip *

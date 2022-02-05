@@ -23,6 +23,10 @@ jobs:
           wget "https://github.com/ihaveamac/ctr_toolkit/releases/download/make_cia6.4builds/make_cia6.4builds.zip"
           unzip make_cia6.4builds.zip
           sudo cp linux/make_cia /usr/local/bin/make_cia && sudo chmod +x /usr/local/bin/make_cia
+          wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-ubuntu_x86_64.zip"
+          unzip makerom-v0.18-ubuntu_x86_64.zip
+          sudo mv -f makerom /usr/local/bin/makerom && sudo chmod +x /usr/local/bin/makerom
+          rm -rf makerom-v0.18-ubuntu_x86_64.zip
       - name: Make YANBF
         run: |
           make dist

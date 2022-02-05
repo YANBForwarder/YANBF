@@ -48,6 +48,7 @@ cmdarg = ""
 if os.name != 'nt':
     cmdarg = "./"
 
+path_addr = 0x23060
 
 def die():
     files = ['data/icon.png',
@@ -250,11 +251,12 @@ else:
 
     # CIA generation
     print("Getting filepath...")
+    forwarder = None
     try:
-        os.mkdir('romfs')
-    except FileExistsError:
-        pass
-    romfs = open('romfs/path.txt', 'w', encoding="utf8")
+        forwarder = open('data/forwarder.bin', 'rb+')
+    except FileNotFoundError:
+        print("Failed to open forwarder.bin. Is your download complete?")
+        die()
     path = unicodedata.normalize("NFC", os.path.abspath(path))
     if os.name == 'nt':
         path = path[2:]
@@ -268,13 +270,14 @@ else:
                 break
             temp = direc
         path = path.replace(temp, "")
-    romfs.write(f"sd:{path}")
-    romfs.close()
+    forwarder.seek(path_addr)
+    forwarder.write((f"sd:{path}\0").encode())
+    forwarder.close()
 
     gamecodeint = int(hexlify(gamecode.encode()).decode(), 16)
     uniqueid = f"0x{hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]}"
     print("Running makerom...")
-    makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
+    makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -code data/forwarder.bin -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 0 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=0 "
     if args.output:
         makeromarg += f'-o "{args.output[0]}" '
     else:
