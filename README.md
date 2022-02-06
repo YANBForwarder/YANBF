@@ -1,9 +1,23 @@
 Yet Another nds-bootstrap Forwarder
 =======
 
-nds-bootstrap forwarder template that is installed as a 3DS homebrew, to allow for more than 40 forwarders.
+YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-bootstrap.
 
-How to use:
+## Features:
+- "forwarders" are referred to placeholder icons that will shortcut to a particular application (in this case, [nds-bootstrap](https://github.com/DS-Homebrew/nds-bootstrap))
+    - Skip the [second menu](https://github.com/DS-Homebrew/TWiLightMenu) and just directly launch
+- Launches from 3DS-mode.
+    - The other implementation by @RocketRobz and @Olmectron, https://gbatemp.net/threads/nds-forwarder-cias-for-your-home-menu.426174/, is DSiWare, which means you are limited to only 40 titles. This works great on the DSi, it does not work great on the 3DS.
+    - This means you can now install as many icons as you want until you max out the HOME menu icon space!
+
+## How it works:
+- A pre-existing forwarder template exists: https://gbatemp.net/threads/nds-forwarder-cias-for-your-home-menu.426174/
+    - This uses a DSiWare template, copies the icon and title and the ROM path, and then installed as a CIA. The CIA, when launched, will boot `sdcard.nds` which will do all the nds-bootstrap setup.
+    - I instead opted to create an `sdcard.nds` bootloader, and then a 3DS-mode app that launches said bootloader
+        - you can't launch `.nds` files from 3DS-mode. So a bootloader is required.
+        - the bootloader does the same thing as the DSiWare template, in actuality
+
+## How to use:
 1. Install Python 3 for your PC: http://python.org/downloads
 1. Go to https://github.com/lifehackerhansol/YANBF/releases, and download the appropriate zip file for your PC OS
 1. Go to https://github.com/RocketRobz/NTR_Forwarder/releases, and download the zip file that is not the source code
@@ -18,23 +32,23 @@ How to use:
 1. An output.cia will be generated. Copy this to your SD card
 1. Boot your 3DS and install both CIAs using FBI
 
-To build:
+## To build:
   1. edit `romFS:/path.txt` to any file path in `sd:/`. Do NOT end with newline, this kills it.
   1. run `make dist`
   1. install both CIAs
   1. voila
 
-Current issues:
+## Current issues:
   - no idea. report if you see one
 
-Credits:
+## Credits:
   - [devkitPro](https://devkitpro.org) for their toolchain
   - [RocketRobz](https://github.com/RocketRobz/NTR_Forwarder) for the TWLNAND bootstrap code
   - [Epicpkmn11](https://github.com/Epicpkmn11) for bannergif.py and testing
 
-License:
+## License:
 
-Bootstrap:
+### Bootstrap:
 ```
  Copyright (C) 2010  Dave "WinterMute" Murphy
 
@@ -53,7 +67,7 @@ Bootstrap:
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ```
 
-The rest:
+### The rest:
 ```
 MIT License
 
