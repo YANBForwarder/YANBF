@@ -274,7 +274,7 @@ else:
     gamecodeint = int(hexlify(gamecode.encode()).decode(), 16)
     uniqueid = f"0x{hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]}"
     print("Running makerom...")
-    makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 1 -micro 0 -DAPP_VERSION_MAJOR=1 "
+    makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 2 -micro 0 -DAPP_VERSION_MAJOR=1 "
     if args.output:
         makeromarg += f'-o "{args.output[0]}" '
     else:
