@@ -1,7 +1,7 @@
 BasicInfo:
   Title                   : $(APP_TITLE)
   ProductCode             : $(APP_PRODUCT_CODE)
-  Logo                    : Homebrew
+  Logo                    : Nintendo
 
 RomFs:
   RootPath: $(APP_ROMFS)
