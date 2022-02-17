@@ -45,6 +45,7 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
   - [devkitPro](https://devkitpro.org) for their toolchain
   - [RocketRobz](https://github.com/RocketRobz/NTR_Forwarder) for the TWLNAND bootstrap code
   - [Epicpkmn11](https://github.com/Epicpkmn11) for bannergif.py and testing
+  - [Olmectron](https://github.com/Olmectron/Simple-Web-App-GUI-for-YANBF-Generator) for the GUI wrapper
 
 ## License:
 
