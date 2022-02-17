@@ -42,9 +42,9 @@ int main() {
 			FILE *path = fopen("sdmc:/_nds/ntr-forwarder/path.txt", "w");
 			fputs(line, path);
 			fclose(path);
-			fclose(file);
 		}
 	}
+	fclose(file);
 	AM_TitleEntry bootstrap;
 	u64 tid = 0x0004800546574452;
 	if(R_SUCCEEDED(AM_GetTitleInfo(MEDIATYPE_NAND, 1, &tid, &bootstrap))) {
@@ -62,9 +62,7 @@ int main() {
 		gfxSwapBuffers();
 		hidScanInput();
 
-		u32 kDown = hidKeysDown();
-		if (kDown & KEY_START)
-			break;
+		if (hidKeysDown() & KEY_START) break;
 	}
 	amExit();
 	gfxExit();
