@@ -58,8 +58,9 @@ int main() {
 	consoleInit(GFX_TOP, NULL);
 	printf("Failed to launch CIA.\n\nPlease reinstall bootstrap.cia from\nYANBF release.\n\nPress START to exit.");
 	while (aptMainLoop()) {
-		gspWaitForVBlank();
+		gfxFlushBuffers();
 		gfxSwapBuffers();
+		gspWaitForVBlank();
 		hidScanInput();
 
 		if (hidKeysDown() & KEY_START) break;
