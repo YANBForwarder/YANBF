@@ -29,6 +29,7 @@ import io
 import os
 import requests
 import unicodedata
+import random
 
 from libscrc import modbus
 from PIL import Image
@@ -41,6 +42,7 @@ parser = argparse.ArgumentParser(description="YANBF Generator")
 parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
 parser.add_argument("-o", "--output", metavar="output.cia", type=str, nargs=1, help="output CIA")
 parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, help="Custom banner box art")
+parser.add_argument("-r", "--randomize", action='store_true', help="Randomize UniqueID")
 
 args = parser.parse_args()
 
@@ -271,8 +273,12 @@ else:
     romfs.write(f"sd:{path}")
     romfs.close()
 
-    gamecodeint = int(hexlify(gamecode.encode()).decode(), 16)
-    uniqueid = f"0x{hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]}"
+    uniqueid = None
+    if(args.randomize):
+        uniqueid = hex(random.randint(0x300, 0xF7FFF))
+    else:
+        gamecodeint = int(hexlify(gamecode.encode()).decode(), 16)
+        uniqueid = f"0x{hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]}"
     print("Running makerom...")
     makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 2 -micro 0 -DAPP_VERSION_MAJOR=1 "
     if args.output:
