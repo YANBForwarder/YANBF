@@ -24,6 +24,9 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
 1. Extract the zip files
 1. From the DS Game Forwarder Pack, copy everything in the for SD card root folder to your SD card root
 1. From YANBF, copy bootstrap.cia to your SD card root
+1. Download the latest TWiLight Menu++ version [here](https://github.com/DS-Homebrew/TWiLightMenu/releases). Only get the `3DS.7z` file.
+1. In the 7z file, go to `_nds`, `TWiLightMenu`, and `extras`.
+1. Drag the `apfix.pck` and `widescreen.pck` file to `sd:/_nds/ntr-forwarder/`.
 1. Open a terminal or command prompt and cd inside the generator folder
 1. Run pip install -r requirements.txt
 1. Run python3 generator.py <path to ROM on your SD card>
@@ -31,6 +34,15 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
     - this ROM MUST BE ON YOUR SD CARD! It will fail to generate properly otherwise!
 1. An output.cia will be generated. Copy this to your SD card
 1. Boot your 3DS and install both CIAs using FBI
+
+## Updating files:
+### Using Universal-Updater
+1. Open Universal-Updater on your 3DS
+    - You can download it here: https://github.com/Universal-Team/Universal-Updater/releases
+1. Navigate to `YANBF`, then install the YANBF Forwarder Pack
+
+### Manually
+1. Re-follow steps 2-9 in the "How to use" section
 
 ## To build:
   1. edit `romFS:/path.txt` to any file path in `sd:/`. Do NOT end with newline, this kills it.
