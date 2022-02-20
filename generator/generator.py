@@ -29,7 +29,7 @@ import os
 import core
 
 def execute(error):
-    if isinstance(error, int):
+    if isinstance(error, int) or isinstance(error, list):
         return
     else:
         print(error)
@@ -56,6 +56,7 @@ if __name__ == "__main__":
     boxart = None
     output = None
     randomize = False
+    tidlow = None
     if args.boxart:
         boxart = args.boxart[0]
     if args.input:
@@ -69,6 +70,8 @@ if __name__ == "__main__":
     cmdarg = ""
     if os.name != 'nt':
         cmdarg = "./"
+    tidlow = core.collisioncheck(path)
+    execute(tidlow)
     print("Extracting and resizing icon...")
     core.makeicon(path)
     print("Getting ROM titles...")
@@ -82,4 +85,4 @@ if __name__ == "__main__":
     print("Getting filepath...")
     execute(core.makeromfs(path))
     print("Running makerom...")
-    execute(core.makecia(cmdarg, path, title, output, randomize))
+    execute(core.makecia(cmdarg, path, title, output, randomize, tidlow))

@@ -15,6 +15,46 @@ from bannergif import bannergif
 def fail(error):
     return error
 
+def collisioncheck(path) -> list:
+    tidlow = []
+    root = None
+    id0 = None
+    id1 = None
+    if os.name == 'nt':
+        root = os.path.abspath(path)[:2]
+    else:
+        temp = path
+        orig_dev = os.stat(temp).st_dev
+        while temp != '/':
+            direc = os.path.dirname(temp)
+            if os.stat(direc).st_dev != orig_dev:
+                break
+            temp = direc
+        root = temp
+    if not os.path.isdir(f"{root}/Nintendo 3DS"):
+        return "Failed to find Nintendo 3DS folder. Is the ROM on the SD card?"
+    if (len([folder for folder in os.listdir(f"{root}/Nintendo 3DS") if os.path.isdir(f"{root}/Nintendo 3DS/{folder}")])) != 2:
+        return "More than one ID0 folder detected. Please remove unnecessary ID0 folders before continuing."
+    for name in os.listdir(f"{root}/Nintendo 3DS"):
+        if len(name) == 32:
+            id0 = name
+            break
+    if id0 is None:
+        return "ID0 not found. Is this ROM on the SD card?"
+    if (len([folder for folder in os.listdir(f"{root}/Nintendo 3DS/{id0}") if os.path.isdir(f"{root}/Nintendo 3DS/{id0}/{folder}")])) != 1:
+        return "More than one ID1 folder detected. Please remove unnecessary ID1 folders before continuing."
+    for name in os.listdir(f"{root}/Nintendo 3DS/{id0}"):
+        if len(name) == 32:
+            id1 = name
+            break
+    if id1 is None:
+        return "ID1 not found. Is this ROM on the SD card?"
+    for name in os.listdir(f"{root}/Nintendo 3DS/{id0}/{id1}/title/00040000"):
+        tidlow.append(name)
+    for index, value in enumerate(tidlow):
+        tidlow[index] = value[1:-2]
+    return tidlow
+
 def get_title(path) -> dict:
     # get banner title
     rom = open(path, "rb")
@@ -217,24 +257,23 @@ def makeromfs(path):
     romfs.close()
     return 0
 
-def makecia(cmdarg, path, title, output=None, randomize=False):
+def makecia(cmdarg, path, title, output=None, randomize=False, tidlow=[]):
     gamecode = getgamecode(path)
     uniqueid = None
     if randomize:
         uniqueid = hex(random.randint(0x300, 0xF7FFF))
     else:
         gamecodeint = int(hexlify(gamecode.encode()).decode(), 16)
-        uniqueid = f"0x{hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]}"
+        uniqueid = hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]
+    while uniqueid in tidlow:
+        uniqueid = str(int(uniqueid) + 1)
     makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 3 -micro 0 -DAPP_VERSION_MAJOR=1 "
     if output:
         makeromarg += f'-o "{output}" '
     else:
         makeromarg += '-o "output.cia" '
-    makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{title["eng"][0]}" -DAPP_UNIQUE_ID={uniqueid}'
+    makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{gamecode} -DAPP_TITLE="{title["eng"][0]}" -DAPP_UNIQUE_ID=0x{uniqueid}'
     makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
     if makeromrun.returncode != 0:
         return f"{makeromrun.stdout}\n{makeromrun.stderr}"
     return "CIA generated."
-
-
-        
