@@ -28,7 +28,6 @@ SOFTWARE.
 
 int main() {
 	romfsInit();
-	gfxInitDefault();
 	amInit();
 	mkdir("sdmc:/_nds", 0777);
 	mkdir("sdmc:/_nds/ntr-forwarder", 0777);
@@ -55,6 +54,7 @@ int main() {
 		}
 	}
 
+	gfxInitDefault();
 	consoleInit(GFX_TOP, NULL);
 	printf("Failed to launch CIA.\n\nPlease reinstall bootstrap.cia from\nYANBF release.\n\nPress START to exit.");
 	while (aptMainLoop()) {
