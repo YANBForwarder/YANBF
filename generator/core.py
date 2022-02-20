@@ -261,7 +261,7 @@ def makecia(cmdarg, path, title, output=None, randomize=False, tidlow=[]):
     gamecode = getgamecode(path)
     uniqueid = None
     if randomize:
-        uniqueid = hex(random.randint(0x300, 0xF7FFF))
+        uniqueid = hex(random.randint(0x300, 0xF7FFF))[2:]
     else:
         gamecodeint = int(hexlify(gamecode.encode()).decode(), 16)
         uniqueid = hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]
