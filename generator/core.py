@@ -20,6 +20,8 @@ def collisioncheck(path) -> list:
     root = None
     id0 = None
     id1 = None
+    id0folders = []
+    id1folders = []
     if os.name == 'nt':
         root = os.path.abspath(path)[:2]
     else:
@@ -33,22 +35,24 @@ def collisioncheck(path) -> list:
         root = temp
     if not os.path.isdir(f"{root}/Nintendo 3DS"):
         return "Failed to find Nintendo 3DS folder. Is the ROM on the SD card?"
-    if (len([folder for folder in os.listdir(f"{root}/Nintendo 3DS") if os.path.isdir(f"{root}/Nintendo 3DS/{folder}")])) != 2:
+    for folder in os.listdir(f"{root}/Nintendo 3DS"):
+        if os.path.isdir(f"{root}/Nintendo 3DS/{folder}") and len(folder) == 32:
+            id0folders.append(folder)
+    if len(id0folders) > 1:
         return "More than one ID0 folder detected. Please remove unnecessary ID0 folders before continuing."
-    for name in os.listdir(f"{root}/Nintendo 3DS"):
-        if len(name) == 32:
-            id0 = name
-            break
-    if id0 is None:
+    elif len(id0folders) == 0:
         return "ID0 not found. Is this ROM on the SD card?"
-    if (len([folder for folder in os.listdir(f"{root}/Nintendo 3DS/{id0}") if os.path.isdir(f"{root}/Nintendo 3DS/{id0}/{folder}")])) != 1:
+    else:
+        id0 = id0folders[0]
+    for folder in os.listdir(f"{root}/Nintendo 3DS/{id0}"):
+        if os.path.isdir(f"{root}/Nintendo 3DS/{id0}/{folder}") and len(folder) == 32:
+            id1folders.append(folder)
+    if len(id1folders) > 1:
         return "More than one ID1 folder detected. Please remove unnecessary ID1 folders before continuing."
-    for name in os.listdir(f"{root}/Nintendo 3DS/{id0}"):
-        if len(name) == 32:
-            id1 = name
-            break
-    if id1 is None:
+    elif len(id1folders) == 0:
         return "ID1 not found. Is this ROM on the SD card?"
+    else:
+        id1 = id1folders[0]
     for name in os.listdir(f"{root}/Nintendo 3DS/{id0}/{id1}/title/00040000"):
         tidlow.append(name)
     for index, value in enumerate(tidlow):
