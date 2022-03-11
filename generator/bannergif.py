@@ -1,5 +1,5 @@
 """
-Copyright © 2021 Pk11
+Copyright © 2022 Pk11
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the “Software”), to deal
@@ -20,25 +20,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from PIL import Image
 import struct
 
+from io import SEEK_CUR
+from libscrc import modbus
+from PIL import Image
 
-def bannergif(path=""):
+def bannergif(path):
     if path == "":
         return -1
     rom = open(path, "rb")
+
     # Seek to banner
     rom.seek(0x68)
-    rom.seek(struct.unpack("<I", rom.read(4))[0])
+    bannerOfs = struct.unpack("<I", rom.read(4))[0]
+    rom.seek(bannerOfs)
+
+    # Load version and check checksums
+    version, _, _, _, dsiChecksum = struct.unpack("<HHHHH", rom.read(10))
+
+    if version & 0x100:
+        rom.seek(bannerOfs + 0x1240)
+        data = rom.read(0x1180)
+        if dsiChecksum != modbus(data):
+            print("Warning: DSi icon checksum failed, using DS icon")
+            version &= ~0x100
+
+    rom.seek(bannerOfs)
 
     # Load banner data
     bitmaps = []
     palettes = []
     animation = []
-    if struct.unpack("<H", rom.read(2))[0] == 0x103:  # DSi (animated)
+    if version == 0x103:  # DSi (animated)
         # Read frame bitmaps
-        rom.seek(0x123E, 1)
+        rom.seek(0x1240, SEEK_CUR)
         for _ in range(8):
             bitmap = [0] * 32 * 32
             for ty in range(4):
@@ -72,7 +88,7 @@ def bannergif(path=""):
             })
     else:  # DS
         # Read bitmap
-        rom.seek(0x1E, 1)
+        rom.seek(0x20, SEEK_CUR)
         bitmap = [0] * 32 * 32
         for ty in range(4):
             for tx in range(4):
