@@ -270,7 +270,7 @@ def makecia(cmdarg, path, title, output=None, randomize=False, tidlow=[]):
         gamecodeint = int(hexlify(gamecode.encode()).decode(), 16)
         uniqueid = hex(gamecodeint ^ ((gamecodeint) >> 27))[3:8]
     while uniqueid in tidlow:
-        uniqueid = str(int(uniqueid) + 1)
+        uniqueid = str(int(uniqueid, 16) + 1)
     makeromarg = f"{cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 3 -micro 0 -DAPP_VERSION_MAJOR=1 "
     if output:
         makeromarg += f'-o "{output}" '
