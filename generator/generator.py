@@ -85,7 +85,7 @@ if __name__ == "__main__":
     print("Creating banner...")
     execute(core.makebanner(cmdarg, path))
     print("Getting filepath...")
-    execute(core.makeromfs(path))
+    execute(core.makeromfs(root, path))
     print("Running makerom...")
     if not output:
         output = f"{root}/cias/output.cia"
