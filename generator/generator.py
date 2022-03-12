@@ -48,7 +48,7 @@ def execute(error):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YANBF Generator")
     parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
-    parser.add_argument("-o", "--output", metavar="output.cia", type=str, nargs=1, help="output CIA")
+    parser.add_argument("-o", "--output", metavar="input.nds.cia", type=str, nargs=1, help="output CIA (defaults to sd:/cias/(rom filename).cia)")
     parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, help="Custom banner box art")
     parser.add_argument("-r", "--randomize", action='store_true', help="Randomize UniqueID")
 
@@ -88,5 +88,5 @@ if __name__ == "__main__":
     execute(core.makeromfs(root, path))
     print("Running makerom...")
     if not output:
-        output = f"{root}/cias/output.cia"
+        output = f"{root}/cias/{os.path.basename(path)}.cia"
     execute(core.makecia(cmdarg, path, title, output, randomize, tidlow))
