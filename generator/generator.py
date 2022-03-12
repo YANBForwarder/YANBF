@@ -71,7 +71,8 @@ if __name__ == "__main__":
     cmdarg = ""
     if os.name != 'nt':
         cmdarg = "./"
-    tidlow = core.collisioncheck(path)
+    root = core.getroot(path)
+    tidlow = core.collisioncheck(root, path)
     execute(tidlow)
     print("Extracting and resizing icon...")
     core.makeicon(path)
@@ -86,4 +87,6 @@ if __name__ == "__main__":
     print("Getting filepath...")
     execute(core.makeromfs(path))
     print("Running makerom...")
+    if not output:
+        output = f"{root}/cias/output.cia"
     execute(core.makecia(cmdarg, path, title, output, randomize, tidlow))

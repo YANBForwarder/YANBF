@@ -15,13 +15,8 @@ from bannergif import bannergif
 def fail(error):
     return error
 
-def collisioncheck(path) -> list:
-    tidlow = []
-    root = None
-    id0 = None
-    id1 = None
-    id0folders = []
-    id1folders = []
+def getroot(path) -> str:
+    root: str = ""
     if os.name == 'nt':
         root = os.path.abspath(path)[:2]
     else:
@@ -33,6 +28,14 @@ def collisioncheck(path) -> list:
                 break
             temp = direc
         root = temp
+    return root
+
+def collisioncheck(root, path) -> list:
+    tidlow = []
+    id0 = None
+    id1 = None
+    id0folders = []
+    id1folders = []
     if not os.path.isdir(f"{root}/Nintendo 3DS"):
         return "Failed to find Nintendo 3DS folder. Is the ROM on the SD card?"
     for folder in os.listdir(f"{root}/Nintendo 3DS"):
@@ -237,7 +240,7 @@ def makebanner(cmdarg, path):
         return f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}"
     return 0
 
-def makeromfs(path):
+def makeromfs(root, path):
     # CIA generation
     try:
         os.mkdir('romfs')
@@ -245,18 +248,9 @@ def makeromfs(path):
         pass
     romfs = open('romfs/path.txt', 'w', encoding="utf8")
     path = unicodedata.normalize("NFC", os.path.abspath(path))
+    path = path.replace(root, "")
     if os.name == 'nt':
-        path = path[2:]
         path = path.replace('\\', '/')
-    else:
-        temp = path
-        orig_dev = os.stat(temp).st_dev
-        while temp != '/':
-            direc = os.path.dirname(temp)
-            if os.stat(direc).st_dev != orig_dev:
-                break
-            temp = direc
-        path = path.replace(temp, "")
     romfs.write(f"sd:{path}")
     romfs.close()
     return 0
