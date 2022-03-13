@@ -41,8 +41,7 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
     - macOS: 
         1. Open YANBF-GUI.dmg
         1. Install YANBFGenerator app
-    - Linux:
-        1. Open YANBF-GUI.AppImage
+    - Linux: Open YANBF-GUI.AppImage
 1. Set the generator directory to the path of your `generator` folder. A file browser icon next to the input can help with this
 1. Drag and drop as many ROMs as you need on your SD card to the app.
     - These ROMs MUST BE ON YOUR SD CARD! It will fail to generate properly otherwise!
