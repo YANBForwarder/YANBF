@@ -12,9 +12,6 @@ from binascii import hexlify
 from bannergif import bannergif
 
 
-def fail(error):
-    return error
-
 def getroot(path) -> str:
     root: str = ""
     if os.name == 'nt':
@@ -29,6 +26,7 @@ def getroot(path) -> str:
             temp = direc
         root = temp
     return root
+
 
 def collisioncheck(root, path) -> list:
     tidlow = []
@@ -61,6 +59,7 @@ def collisioncheck(root, path) -> list:
     for index, value in enumerate(tidlow):
         tidlow[index] = value[1:-2]
     return tidlow
+
 
 def get_title(path) -> dict:
     # get banner title
@@ -117,13 +116,15 @@ def get_title(path) -> dict:
             titles[lang] = None
     return titles
 
+
 def getgamecode(path):
     rom = open(path, "rb")
     rom.seek(0xC, 0)
     code = str(rom.read(0x4), "ascii")
     rom.close()
     return code
-    
+
+
 def makeicon(path):
     im = bannergif(path)
     im.putpalette(b"\xFF\xFF\xFF" + im.palette.palette[3:])
@@ -131,6 +132,7 @@ def makeicon(path):
     im = im.resize((48, 48), resample=Image.LINEAR)
     im.save('data/icon.png')
     return 0
+
 
 def makesmdh(cmdarg, path, title):
     bannertoolarg = f'{cmdarg}bannertool makesmdh -i "data/icon.png" '
@@ -171,22 +173,23 @@ def makesmdh(cmdarg, path, title):
             bannertoolarg += f'-ss "{title["spa"][0]}" -sl "{title["spa"][0]}" -sp "{title["spa"][1]}" '
 
     if 'chn' in title and title['chn'] is not None:
-            if len(title['chn']) == 3:
-                bannertoolarg += f'-scs "{title["chn"][0]} {title["chn"][1]}" -scl "{title["chn"][0]} {title["chn"][1]}" -scp "{title["chn"][2]}" '
-            else:
-                bannertoolarg += f'-scs "{title["chn"][0]}" -scl "{title["chn"][0]}" -scp "{title["chn"][1]}" '
+        if len(title['chn']) == 3:
+            bannertoolarg += f'-scs "{title["chn"][0]} {title["chn"][1]}" -scl "{title["chn"][0]} {title["chn"][1]}" -scp "{title["chn"][2]}" '
+        else:
+            bannertoolarg += f'-scs "{title["chn"][0]}" -scl "{title["chn"][0]}" -scp "{title["chn"][1]}" '
 
     if 'kor' in title and title['kor'] is not None:
-            if len(title['kor']) == 3:
-                bannertoolarg += f'-ks "{title["kor"][0]} {title["kor"][1]}" -kl "{title["kor"][0]} {title["kor"][1]}" -kp "{title["kor"][2]}" '
-            else:
-                bannertoolarg += f'-ks "{title["kor"][0]}" -kl "{title["kor"][0]}" -kp "{title["kor"][1]}" '
+        if len(title['kor']) == 3:
+            bannertoolarg += f'-ks "{title["kor"][0]} {title["kor"][1]}" -kl "{title["kor"][0]} {title["kor"][1]}" -kp "{title["kor"][2]}" '
+        else:
+            bannertoolarg += f'-ks "{title["kor"][0]}" -kl "{title["kor"][0]}" -kp "{title["kor"][1]}" '
 
     bannertoolarg += '-o "data/output.smdh"'
     bannertoolrun = subprocess.run(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     if bannertoolrun.returncode != 0:
         return f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}"
     return 0
+
 
 def downloadboxart(path, boxart=None):
     # get boxart for DS, to make banner
@@ -234,11 +237,18 @@ def downloadboxart(path, boxart=None):
     new_image.save('data/banner.png', 'PNG')
     return 0
 
-def makebanner(cmdarg, path):
-    bannertoolrun = subprocess.run(f"{cmdarg}bannertool makebanner -i data/banner.png -a data/dsboot.wav -o data/banner.bin", shell=True, capture_output=True, universal_newlines=True)
+
+def makebanner(cmdarg, path, sound):
+    if sound:
+        if not os.path.isfile(sound):
+            return "Sound does not exist. Is your argument correct?"
+    else:
+        sound = "data/dsboot.wav"
+    bannertoolrun = subprocess.run(f"{cmdarg}bannertool makebanner -i data/banner.png -a {sound} -o data/banner.bin", shell=True, capture_output=True, universal_newlines=True)
     if bannertoolrun.returncode != 0:
         return f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}"
     return 0
+
 
 def makeromfs(root, path):
     # CIA generation
@@ -254,6 +264,7 @@ def makeromfs(root, path):
     romfs.write(f"sd:{path}")
     romfs.close()
     return 0
+
 
 def makecia(cmdarg, root, path, title, output=None, randomize=False, tidlow=[]):
     if not output:

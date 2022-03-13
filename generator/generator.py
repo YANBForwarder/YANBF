@@ -29,6 +29,7 @@ from sys import exit
 
 import core
 
+
 def execute(error):
     if isinstance(error, int) or isinstance(error, list):
         return
@@ -45,17 +46,20 @@ def execute(error):
             continue
     exit()
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YANBF Generator")
     parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
     parser.add_argument("-o", "--output", metavar="input.nds.cia", type=str, nargs=1, help="output CIA (defaults to sd:/cias/(rom filename).cia)")
     parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, help="Custom banner box art")
+    parser.add_argument("-s", "--sound", metavar="sound.wav", type=str, nargs=1, help="Custom icon sound (WAV only)")
     parser.add_argument("-r", "--randomize", action='store_true', help="Randomize UniqueID")
 
-    args = parser.parse_args() 
+    args = parser.parse_args()
     path = None
     boxart = None
     output = None
+    sound = None
     randomize = False
     tidlow = None
     if args.boxart:
@@ -66,8 +70,11 @@ if __name__ == "__main__":
         output = args.output[0]
     if args.randomize:
         randomize = True
+    if args.sound:
+        sound = args.sound[0]
     if not os.path.exists(os.path.abspath(path)):
-        die("Failed to open ROM. Is the path valid?")
+        print("Failed to open ROM. Is the path valid?")
+        exit()
     cmdarg = ""
     if os.name != 'nt':
         cmdarg = "./"
@@ -83,7 +90,7 @@ if __name__ == "__main__":
     print("Downloading boxart...")
     execute(core.downloadboxart(path, boxart))
     print("Creating banner...")
-    execute(core.makebanner(cmdarg, path))
+    execute(core.makebanner(cmdarg, path, sound))
     print("Getting filepath...")
     execute(core.makeromfs(root, path))
     print("Running makerom...")

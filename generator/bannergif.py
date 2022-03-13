@@ -26,6 +26,7 @@ from io import SEEK_CUR
 from libscrc import modbus
 from PIL import Image
 
+
 def bannergif(path):
     if path == "":
         return -1
