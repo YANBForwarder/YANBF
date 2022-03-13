@@ -48,19 +48,18 @@ jobs:
         run: |
           curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
           unzip bannertool.zip
-          move windows-x86_64\bannertool.exe YANBF/generator/bannertool.exe
+          mv -f windows-x86_64\bannertool.exe YANBF/generator/bannertool.exe
           curl -LJO "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-win_x86_64.zip"
           unzip makerom-v0.18-win_x86_64.zip
-          move makerom.exe YANBF/generator/makerom.exe
-          curl -LJO "https://github.com/Olmectron/Simple-Web-App-GUI-for-YANBF-Generator/releases/download/v1.0.3/yanbf-gui-1.0.3-windows-x64.exe"
-          move yanbf-gui-1.0.3-windows-x64.exe YANBF/generator/yanbf-gui-1.0.3.exe
+          mv -f makerom.exe YANBF/generator/makerom.exe
+          curl -LJO "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.exe"
+          mv -f YANBF-GUI.exe YANBF/generator/YANBF-GUI.exe
           cd YANBF/generator
           pyinstaller --onefile generator.py
-          move dist\generator.exe generator.exe
-          rd /s /q dist build __pycache__
-          del /q *.py requirements.txt generator.spec
+          mv dist/generator generator
+          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
           cd ../..
-        shell: cmd
+        shell: bash
       - name: Publish
         uses: actions/upload-artifact@v2
         with:
@@ -89,12 +88,12 @@ jobs:
         run: |
           wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
           unzip bannertool.zip
-          cp mac-x86_64/bannertool YANBF/generator/bannertool
+          mv -f mac-x86_64/bannertool YANBF/generator/bannertool
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-macos_x86_64.zip"
           unzip makerom-v0.18-macos_x86_64.zip
           mv -f makerom YANBF/generator/makerom
-          wget "https://github.com/Olmectron/Simple-Web-App-GUI-for-YANBF-Generator/releases/download/v1.0.3/yanbf-gui-1.0.3-osx.dmg"
-          mv -f yanbf-gui-1.0.3-osx.dmg YANBF/generator/yanbf-gui-1.0.3.dmg
+          wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.dmg"
+          mv -f YANBF-GUI.dmg YANBF/generator/YANBF-GUI.dmg
           cd YANBF/generator
           pyinstaller --onefile generator.py
           mv dist/generator generator
@@ -132,12 +131,12 @@ jobs:
         run: |
           wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
           unzip bannertool.zip
-          cp linux-x86_64/bannertool YANBF/generator/bannertool
+          mv -f linux-x86_64/bannertool YANBF/generator/bannertool
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-ubuntu_x86_64.zip"
           unzip makerom-v0.18-ubuntu_x86_64.zip
           mv -f makerom YANBF/generator/makerom
-          wget "https://github.com/Olmectron/Simple-Web-App-GUI-for-YANBF-Generator/releases/download/v1.0.3/yanbf-gui-1.0.3-linux.AppImage"
-          mv -f yanbf-gui-1.0.3-linux.AppImage dist/generator/yanbf-gui-1.0.3.AppImage
+          wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.AppImage"
+          mv -f YANBF-GUI.AppImage dist/generator/YANBF-GUI.AppImage
           cd YANBF/generator
           pyinstaller --onefile generator.py
           mv dist/generator generator
@@ -159,14 +158,20 @@ jobs:
     needs: [macos, windows, linux]
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
-      - name: Extract bootstrap
-        run: unzip YANBF-macOS.zip
+        uses: actions/download-artifact@v3
+      - name: Re-zip everything because this isn't implemented for whatever reason
+        run: |
+          cd YANBF-Windows
+          zip -r ../YANBF-Windows.zip *
+          cd ../YANBF-macOS
+          zip -r ../YANBF-macOS.zip *
+          cd ../YANBF-Linux
+          zip -r ../YANBF-Linux.zip *
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
+            YANBF-Windows/bootstrap.cia
             YANBF-Windows.zip
             YANBF-macOS.zip
             YANBF-Linux.zip
-            bootstrap.cia
