@@ -48,7 +48,7 @@ jobs:
         run: |
           curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
           unzip bannertool.zip
-          mv -f windows-x86_64\bannertool.exe YANBF/generator/bannertool.exe
+          mv -f windows-x86_64/bannertool.exe YANBF/generator/bannertool.exe
           curl -LJO "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-win_x86_64.zip"
           unzip makerom-v0.18-win_x86_64.zip
           mv -f makerom.exe YANBF/generator/makerom.exe
@@ -136,7 +136,7 @@ jobs:
           unzip makerom-v0.18-ubuntu_x86_64.zip
           mv -f makerom YANBF/generator/makerom
           wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.AppImage"
-          mv -f YANBF-GUI.AppImage dist/generator/YANBF-GUI.AppImage
+          mv -f YANBF-GUI.AppImage YANBF/generator/YANBF-GUI.AppImage
           cd YANBF/generator
           pyinstaller --onefile generator.py
           mv dist/generator generator
