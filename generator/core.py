@@ -255,7 +255,13 @@ def makeromfs(root, path):
     romfs.close()
     return 0
 
-def makecia(cmdarg, path, title, output=None, randomize=False, tidlow=[]):
+def makecia(cmdarg, root, path, title, output=None, randomize=False, tidlow=[]):
+    if not output:
+        output = f"{root}/cias/{os.path.basename(path)}.cia"
+        try:
+            os.mkdir(f"{root}/cias")
+        except FileExistsError:
+            pass
     gamecode = getgamecode(path)
     uniqueid = None
     if randomize:

@@ -87,6 +87,4 @@ if __name__ == "__main__":
     print("Getting filepath...")
     execute(core.makeromfs(root, path))
     print("Running makerom...")
-    if not output:
-        output = f"{root}/cias/{os.path.basename(path)}.cia"
-    execute(core.makecia(cmdarg, path, title, output, randomize, tidlow))
+    execute(core.makecia(cmdarg, root, path, title, output, randomize, tidlow))
