@@ -32,13 +32,14 @@ import core
 
 def execute(error):
     if isinstance(error, int) or isinstance(error, list):
-        return
+        return error
     else:
         print(error)
     files = ['data/icon.png',
              'data/banner.bin',
              'data/output.smdh',
-             'data/banner.png']
+             'data/banner.png',
+             'data/customsound.wav']
     for file in files:
         try:
             os.remove(file)
@@ -87,8 +88,14 @@ if __name__ == "__main__":
     title = core.get_title(path)
     print("Creating SMDH...")
     execute(core.makesmdh(cmdarg, path, title))
-    print("Downloading boxart...")
-    execute(core.downloadboxart(path, boxart))
+    print("Checking API if a custom banner or sound is provided...")
+    downloadedfiles = execute(core.downloadfromapi(path, boxart, sound))
+    print(downloadedfiles)
+    if downloadedfiles in [1, 2]:
+        sound = "data/customsound.wav"
+    if downloadedfiles not in [1, 3]:
+        print("Getting standard boxart...")
+        execute(core.downloadboxart(path, boxart))
     print("Creating banner...")
     execute(core.makebanner(cmdarg, path, sound))
     print("Getting filepath...")

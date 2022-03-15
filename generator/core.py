@@ -191,6 +191,38 @@ def makesmdh(cmdarg, path, title):
     return 0
 
 
+def downloadfromapi(path, boxart=None, sound=None):
+    gamecode = getgamecode(path)
+    boxartdl = False
+    sounddl = False
+    r = requests.get(f"https://yanbf.api.hansol.ca/banner/{gamecode}")
+    if r.status_code == 200:
+        data = r.json()
+        if not boxart:
+            if 'image' in data:
+                r = requests.get(data['image'])
+                if r.status_code == 200:
+                    f = open("data/banner.png", 'wb')
+                    f.write(r.content)
+                    f.close()
+                    boxartdl = True
+        if not sound:
+            if 'sound' in data:
+                r = requests.get(data['sound'])
+                if r.status_code == 200:
+                    f = open("data/customsound.wav", 'wb')
+                    f.write(r.content)
+                    f.close()
+                    sounddl = True
+    if boxartdl and sounddl:
+        return 1
+    elif sounddl:
+        return 2
+    elif boxartdl:
+        return 3
+    return 0
+                    
+
 def downloadboxart(path, boxart=None):
     # get boxart for DS, to make banner
     gamecode = getgamecode(path)
