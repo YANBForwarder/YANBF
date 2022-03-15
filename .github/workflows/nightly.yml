@@ -18,7 +18,7 @@ jobs:
     name: Build standard
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Get tools
         run: |
           wget "https://github.com/ihaveamac/ctr_toolkit/releases/download/make_cia6.4builds/make_cia6.4builds.zip"
@@ -73,7 +73,7 @@ jobs:
           name: YANBF-Windows
 
   macos:
-    runs-on: macos-11
+    runs-on: macos-10.15
     name: Build macOS
     if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
     needs: generator
@@ -114,7 +114,7 @@ jobs:
           name: YANBF-macOS
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     name: Build Linux
     if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
     needs: generator
