@@ -13,14 +13,10 @@
 *.bin
 __pycache__
 dist
-forwarder/build
-bootstrap/arm7/build
-bootstrap/arm9/build
-sd/arm7/build
-sd/arm9/build
+build
 universal/data
-universal/bootloader/build
 generator/romfs/path.txt
 generator/output
 bannertool*
 makerom*
+venv

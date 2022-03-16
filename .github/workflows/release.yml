@@ -40,7 +40,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: '3.9'
       - name: Install pyinstaller
         run: |
           py -m pip install -r YANBF/generator/requirements.txt
@@ -55,9 +55,9 @@ jobs:
           curl -LJO "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.exe"
           mv -f YANBF-GUI.exe YANBF/generator/YANBF-GUI.exe
           cd YANBF/generator
-          pyinstaller --onefile generator.py
-          mv dist/generator generator
-          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
+          py setup.py build
+          cp -r dist/* .
+          rm -rf *.py dist __pycache__ dist requirements.txt
           cd ../..
         shell: bash
       - name: Publish
@@ -95,9 +95,9 @@ jobs:
           wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.dmg"
           mv -f YANBF-GUI.dmg YANBF/generator/YANBF-GUI.dmg
           cd YANBF/generator
-          pyinstaller --onefile generator.py
-          mv dist/generator generator
-          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
+          python3 setup.py build
+          cp -r dist/* .
+          rm -rf *.py dist __pycache__ dist requirements.txt
           chmod +x bannertool
           chmod +x makerom
           chmod +x generator
@@ -123,7 +123,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: '3.9'
       - name: Install pyinstaller
         run: |
           pip3 install -r YANBF/generator/requirements.txt
@@ -138,9 +138,9 @@ jobs:
           wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.AppImage"
           mv -f YANBF-GUI.AppImage YANBF/generator/YANBF-GUI.AppImage
           cd YANBF/generator
-          pyinstaller --onefile generator.py
-          mv dist/generator generator
-          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
+          python3 setup.py build
+          cp -r dist/* .
+          rm -rf *.py dist __pycache__ dist requirements.txt
           chmod +x makerom
           chmod +x bannertool
           chmod +x generator

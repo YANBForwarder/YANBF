@@ -47,25 +47,24 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-      - name: Install pyinstaller
+          python-version: '3.9'
+      - name: Install dependencies
         run: |
           py -m pip install -r YANBF/generator/requirements.txt
       - name: Create package
         run: |
           curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
           unzip bannertool.zip
-          move windows-x86_64\bannertool.exe YANBF/generator/bannertool.exe
+          mv -f windows-x86_64/bannertool.exe YANBF/generator/bannertool.exe
           curl -LJO "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-win_x86_64.zip"
           unzip makerom-v0.18-win_x86_64.zip
-          move makerom.exe YANBF/generator/makerom.exe
+          mv -f makerom.exe YANBF/generator/makerom.exe
           cd YANBF/generator
-          pyinstaller --onefile generator.py
-          move dist\generator.exe generator.exe
-          rd /s /q dist build __pycache__
-          del /q *.py requirements.txt generator.spec
+          py setup.py build
+          cp -r dist/* .
+          rm -rf *.py dist __pycache__ dist requirements.txt
           cd ../..
-        shell: cmd
+        shell: bash
       - name: Publish
         uses: actions/upload-artifact@v2
         with:
@@ -87,7 +86,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-      - name: Install pyinstaller
+      - name: Install dependencies
         run: |
           python3 -m pip install -r YANBF/generator/requirements.txt
       - name: Create package
@@ -99,9 +98,9 @@ jobs:
           unzip makerom-v0.18-macos_x86_64.zip
           mv -f makerom YANBF/generator/makerom
           cd YANBF/generator
-          pyinstaller --onefile generator.py
-          mv dist/generator generator
-          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
+          python3 setup.py build
+          cp -r dist/* .
+          rm -rf *.py dist __pycache__ dist requirements.txt
           chmod +x bannertool
           chmod +x makerom
           chmod +x generator
@@ -127,8 +126,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-      - name: Install pyinstaller
+          python-version: '3.9'
+      - name: Install dependencies
         run: |
           pip3 install -r YANBF/generator/requirements.txt
       - name: Create package
@@ -140,9 +139,9 @@ jobs:
           unzip makerom-v0.18-ubuntu_x86_64.zip
           mv -f makerom YANBF/generator/makerom
           cd YANBF/generator
-          pyinstaller --onefile generator.py
-          mv dist/generator generator
-          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
+          python3 setup.py build
+          cp -r dist/* .
+          rm -rf *.py dist __pycache__ dist requirements.txt
           chmod +x makerom
           chmod +x bannertool
           chmod +x generator
