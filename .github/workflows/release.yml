@@ -41,9 +41,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-      - name: Install pyinstaller
+      - name: Install dependencies
         run: |
           py -m pip install -r YANBF/generator/requirements.txt
+          py -m pip install cx-Freeze
       - name: Create package
         run: |
           curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
@@ -81,9 +82,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-      - name: Install pyinstaller
+      - name: Install dependencies
         run: |
           python3 -m pip install -r YANBF/generator/requirements.txt
+          python3 -m pip install pyinstaller
       - name: Create package
         run: |
           wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
@@ -95,12 +97,9 @@ jobs:
           wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.dmg"
           mv -f YANBF-GUI.dmg YANBF/generator/YANBF-GUI.dmg
           cd YANBF/generator
-          python3 setup.py build
-          cp -r dist/* .
-          rm -rf *.py dist __pycache__ dist requirements.txt
-          chmod +x bannertool
-          chmod +x makerom
-          chmod +x generator
+          pyinstaller --onefile generator.py
+          mv dist/generator generator
+          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
           rm -rf 
           cd ..
       - name: Publish
@@ -124,9 +123,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-      - name: Install pyinstaller
+      - name: Install dependencies
         run: |
           pip3 install -r YANBF/generator/requirements.txt
+          pip3 install pyinstaller
       - name: Create package
         run: |
           wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
@@ -138,12 +138,9 @@ jobs:
           wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.AppImage"
           mv -f YANBF-GUI.AppImage YANBF/generator/YANBF-GUI.AppImage
           cd YANBF/generator
-          python3 setup.py build
-          cp -r dist/* .
-          rm -rf *.py dist __pycache__ dist requirements.txt
-          chmod +x makerom
-          chmod +x bannertool
-          chmod +x generator
+          pyinstaller --onefile generator.py
+          mv dist/generator generator
+          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
           cd ../..
       - name: Publish
         uses: actions/upload-artifact@v2

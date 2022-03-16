@@ -51,6 +51,7 @@ jobs:
       - name: Install dependencies
         run: |
           py -m pip install -r YANBF/generator/requirements.txt
+          py -m pip install cx-Freeze
       - name: Create package
         run: |
           curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
@@ -89,6 +90,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install -r YANBF/generator/requirements.txt
+          python3 -m pip install pyinstaller
       - name: Create package
         run: |
           wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
@@ -98,13 +100,9 @@ jobs:
           unzip makerom-v0.18-macos_x86_64.zip
           mv -f makerom YANBF/generator/makerom
           cd YANBF/generator
-          python3 setup.py build
-          cp -r dist/* .
-          rm -rf *.py dist __pycache__ dist requirements.txt
-          chmod +x bannertool
-          chmod +x makerom
-          chmod +x generator
-          rm -rf 
+          pyinstaller --onefile generator.py
+          mv dist/generator generator
+          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
           cd ..
       - name: Publish
         uses: actions/upload-artifact@v2
@@ -130,6 +128,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip3 install -r YANBF/generator/requirements.txt
+          pip3 install pyinstaller
       - name: Create package
         run: |
           wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
@@ -139,12 +138,9 @@ jobs:
           unzip makerom-v0.18-ubuntu_x86_64.zip
           mv -f makerom YANBF/generator/makerom
           cd YANBF/generator
-          python3 setup.py build
-          cp -r dist/* .
-          rm -rf *.py dist __pycache__ dist requirements.txt
-          chmod +x makerom
-          chmod +x bannertool
-          chmod +x generator
+          pyinstaller --onefile generator.py
+          mv dist/generator generator
+          rm -rf *.py build generator.spec __pycache__ dist requirements.txt
           cd ../..
       - name: Publish
         uses: actions/upload-artifact@v2
