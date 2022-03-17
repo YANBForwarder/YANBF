@@ -18,17 +18,18 @@
 
 #include <iostream>
 #include <string>
+#include <filesystem>
 #include <unistd.h>
-#include <boost/filesystem.hpp>
 
 #include "json.hpp"
 #include "argparse.hpp"
 #include "bannerpng.h"
 #include "core.hpp"
+#include "ndsheaderbanner.h"
 
 #define APPVERSION "1.5.0"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 int main(int argc, char** argv) {
     std::cout << "YANBF Generator v" << APPVERSION << std::endl;
@@ -46,7 +47,8 @@ int main(int argc, char** argv) {
         std::cerr << parser;
         std::exit(1);
     }
-    fs::path path = parser.get<std::string>("input");
-    std::cout << path.root_path() << std::endl;
+    Forwarder forwarder(parser.get<std::string>("input"));
+
+    std::cout << forwarder.getroot() << std::endl;
     return 0;
 }

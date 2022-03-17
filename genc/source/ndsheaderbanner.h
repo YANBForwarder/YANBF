@@ -19,6 +19,10 @@
 // all defines pulled from TWiLight Menu++
 // https://github.com/DS-Homebrew/TWiLightMenu/blob/587a3ab0bd74d5f74f6eb1dd34ad9673b18c4606/romsel_dsimenutheme/arm9/source/ndsheaderbanner.h
 
+#define u8 uint8_t
+#define u16 uint16_t
+#define u32 uint32_t
+
 typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
 	char gameCode[4];			//!< 4 characters for the game code.

@@ -29,10 +29,10 @@ export STRIP	:=	$(PREFIX)strip
 #--- set path
 ### relative path from build
 ifeq ($(OS),Windows_NT)
-LIBS	+=	-Wl,-Bstatic -lz
+LIBS	+=	-Wl,-Bstatic
 LIBDIRS	:= /lib
 else
-LIBS	+= -Wl,-Bstatic -lboost_filesystem -Wl,-Bdynamic -ldl
+LIBS	+= -Wl,-Bstatic -Wl,-Bdynamic -ldl
 LIBDIRS	:= libs
 endif
 export LIBS
@@ -69,7 +69,7 @@ LDFLAGS	=	$(ARCH) $(LDF) -O2
 
 
 CXXFLAGS += -fno-rtti
-LDFLAGS += -static-libgcc -static-libstdc++
+LDFLAGS += -static -static-libgcc -static-libstdc++
 
 
 
@@ -112,6 +112,7 @@ $(BUILD):
 clean:
 	@#echo clean ...
 	@rm -fr $(BUILD) 
+	@rm $(TARGET)
 
 #---------------------------------------------------------------------------------
 else

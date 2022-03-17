@@ -15,3 +15,21 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+namespace fs = std::filesystem;
+
+class Forwarder {
+    private:
+        std::string root;
+        std::vector<std::string> tidlow;
+    public:
+        fs::path ROMpath;
+
+        Forwarder(const std::string path);
+        virtual ~Forwarder(){}
+        
+        // funny debugging
+        std::string getroot();
+
+        bool collisioncheck();
+};

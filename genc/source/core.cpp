@@ -19,20 +19,33 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include <unistd.h>
 
-#include <boost/filesystem.hpp>
 #include "bannerpng.h"
+#include "core.hpp"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
-std::vector collisioncheck(root, path) {
-    std::vector tidlow;
+
+Forwarder::Forwarder(const std::string path){
+            ROMpath = path;
+            root = ROMpath.root_path().string();
+        }
+
+        // funny debugging
+std::string Forwarder::getroot() {
+    return root;
+}
+
+bool Forwarder::collisioncheck() {
     std::string id0;
     std::string id1;
     std::vector<std::string> id0folders;
     std::vector<std::string> id1folders;
     std::string n3dsfolder = root + "/Nintendo 3DS";
     if (access(n3dsfolder.c_str(), F_OK) != 0) throw std::invalid_argument("Failed to find Nintendo 3DS folder. Is the ROM on the SD card?\n");
+    return true;
 }
+
