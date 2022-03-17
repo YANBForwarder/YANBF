@@ -17,6 +17,7 @@
 */
 
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -33,6 +34,8 @@ namespace fs = std::filesystem;
 Forwarder::Forwarder(const std::string path){
     ROMpath = path;
     root = ROMpath.root_path().string();
+    header = (sNDSHeaderExt*)malloc(sizeof(sNDSHeaderExt));
+    banner = (sNDSBannerExt*)malloc(sizeof(sNDSBannerExt));
 }
 
 // funny debugging
@@ -67,5 +70,14 @@ bool Forwarder::collisioncheck() {
     for (const auto& dirEntry : fs::directory_iterator(titlefolder)) if(fs::is_directory(dirEntry.path())) tidlow.push_back(dirEntry.path().filename().string());
     for(int i=0;i<tidlow.size();i++) tidlow[i] = tidlow[i].substr(1, tidlow[i].size()-3);
 
+    return true;
+}
+
+bool Forwarder::gettitle() {
+    FILE* rom = fopen(ROMpath.string().c_str(), "rb");
+	fread(header, sizeof(sNDSHeaderExt), 1, rom);
+    fseek(rom, header->bannerOffset, SEEK_SET);
+    fread(banner, sizeof(sNDSBannerExt), 1, rom);
+    fclose(rom);
     return true;
 }
