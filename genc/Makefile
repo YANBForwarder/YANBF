@@ -6,7 +6,6 @@ TARGET := generator
 
 SOURCES		+= source
 INCLUDES	+= 
-DATA		+= data 
 
 #--- set toolchain name
 ifneq ($(CLANG),)

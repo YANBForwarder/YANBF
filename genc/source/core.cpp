@@ -81,3 +81,7 @@ bool Forwarder::gettitle() {
     fclose(rom);
     return true;
 }
+
+bool Forwarder::geticon() {
+    return bannerpng(banner, "data/output.png");
+}

@@ -42,4 +42,5 @@ class Forwarder {
 
         bool collisioncheck();
         bool gettitle();
+        bool geticon();
 };

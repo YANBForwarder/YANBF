@@ -1,4 +1,5 @@
 /* Copyright © 2022 Pk11
+ * Copyright © 2022 lifehackerhansol (some funny hack)
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -19,12 +20,8 @@
  * THE SOFTWARE.
  */
 
-/* To build:
- * gcc bannerpng.c lodepng.c -o bannerpng
- * https://lodev.org/lodepng/
- */
-
 #include "lodepng.h"
+#include "ndsheaderbanner.h"
 
 #include <math.h>
 #include <stdbool.h>
@@ -36,26 +33,14 @@
  * @param output path to write to
  * @return true if successful
  */
-bool bannerpng(const char *input, const char *output) {
-	FILE *rom = fopen(input, "rb");
-	if(!rom)
-		return false;
-	
-	// Seek to banner
-	fseek(rom, 0x68, SEEK_SET);
-	uint32_t bannerOfs;
-	fread(&bannerOfs, sizeof(uint32_t), 1, rom);
-	fseek(rom, bannerOfs, SEEK_SET);
-
+bool bannerpng(const sNDSBannerExt *banner, const char *output) {
 	// Load banner data
 	uint8_t palette[0x10][4]; // 16 colors RGBA
 	uint8_t bitmap[32 * 32 * 4]; // 32×32 RGBA
 
 	// Read palette
-	fseek(rom, bannerOfs + 0x220, SEEK_SET);
 	for(int i = 0; i < 0x10; i++) {
-		uint16_t color;
-		fread(&color, sizeof(uint16_t), 1, rom);
+		uint16_t color = banner->palette[i];
 		palette[i][0] = lroundf((color & 0x1F) * 255.0f / 31.0f);
 		palette[i][1] = lroundf(((color >> 5) & 0x1F) * 255.0f / 31.0f);
 		palette[i][2] = lroundf(((color >> 10) & 0x1F) * 255.0f / 31.0f);
@@ -63,22 +48,14 @@ bool bannerpng(const char *input, const char *output) {
 	}
 
 	// Read bitmap
-	fseek(rom, bannerOfs + 0x20, SEEK_SET);
-	for(int ty = 0; ty < 4; ty++) {
-		for(int tx = 0; tx < 4; tx++) {
-			for(int y = 0; y < 8; y++) {
-				for(int x = 0; x < 4; x++) {
-					uint8_t byte = fgetc(rom);
-					memcpy(bitmap + ((ty * 8 + y) * 32 * 4) + (tx * 8 + x * 2) * 4, palette[byte & 0xF], 4);
-					memcpy(bitmap + ((ty * 8 + y) * 32 * 4) + (tx * 8 + x * 2) * 4 + 4, palette[byte >> 4], 4);
-				}
-			}
-		}
+	uint8_t *icon = banner->icon;
+	for(int ty = 0; ty < 4; ty++) for(int tx = 0; tx < 4; tx++) for(int y = 0; y < 8; y++) for(int x = 0; x < 4; x++) {
+		uint8_t byte = *(icon++);
+		memcpy(bitmap + ((ty * 8 + y) * 32 * 4) + (tx * 8 + x * 2) * 4, palette[byte & 0xF], 4);
+		memcpy(bitmap + ((ty * 8 + y) * 32 * 4) + (tx * 8 + x * 2) * 4 + 4, palette[byte >> 4], 4);
 	}
 
-	fclose(rom);
+	int err = lodepng_encode32_file(output, bitmap, 32, 32);
 
-	lodepng_encode32_file(output, bitmap, 32, 32);
-
-	return true;
+	return err == 0 ? true : false;
 }
