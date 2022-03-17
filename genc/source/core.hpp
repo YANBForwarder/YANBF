@@ -17,6 +17,7 @@
 */
 
 #include <filesystem>
+#include "ndsheaderbanner.h"
 
 namespace fs = std::filesystem;
 
@@ -24,14 +25,21 @@ class Forwarder {
     private:
         std::string root;
         std::vector<std::string> tidlow;
+        sNDSHeaderExt* header;
+        sNDSBannerExt* banner;
     public:
         fs::path ROMpath;
 
         Forwarder(const std::string path);
-        virtual ~Forwarder(){}
+
+        virtual ~Forwarder(){
+            free(header);
+            free(banner);
+        }
         
         // funny debugging
         std::string getroot();
 
         bool collisioncheck();
+        bool gettitle();
 };

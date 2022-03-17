@@ -25,7 +25,6 @@
 #include "argparse.hpp"
 #include "bannerpng.h"
 #include "core.hpp"
-#include "ndsheaderbanner.h"
 
 #define APPVERSION "1.5.0"
 
@@ -55,5 +54,6 @@ int main(int argc, char** argv) {
         std::cerr << err.what() << std::endl;
         return 1;
     }
+    forwarder.gettitle();
     return 0;
 }
