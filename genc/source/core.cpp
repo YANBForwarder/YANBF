@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <cstdio>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -30,22 +31,41 @@ namespace fs = std::filesystem;
 
 
 Forwarder::Forwarder(const std::string path){
-            ROMpath = path;
-            root = ROMpath.root_path().string();
-        }
+    ROMpath = path;
+    root = ROMpath.root_path().string();
+}
 
-        // funny debugging
+// funny debugging
 std::string Forwarder::getroot() {
     return root;
 }
 
 bool Forwarder::collisioncheck() {
-    std::string id0;
-    std::string id1;
-    std::vector<std::string> id0folders;
-    std::vector<std::string> id1folders;
-    std::string n3dsfolder = root + "/Nintendo 3DS";
-    if (access(n3dsfolder.c_str(), F_OK) != 0) throw std::invalid_argument("Failed to find Nintendo 3DS folder. Is the ROM on the SD card?\n");
+    fs::path id0;
+    fs::path id1;
+    std::vector<fs::path> id0folders;
+    std::vector<fs::path> id1folders;
+    fs::path n3dsfolder = root + "Nintendo 3DS";
+    if (!fs::exists(n3dsfolder)) throw std::invalid_argument("Failed to find Nintendo 3DS folder. Is the ROM on the SD card?\n");
+    for (const auto& dirEntry : fs::directory_iterator(n3dsfolder)) {
+        if(fs::is_directory(dirEntry.path())) {
+            std::string foldername = dirEntry.path().filename().string();
+            if (foldername.size() == 32) id0folders.push_back(dirEntry.path());
+        }
+    };
+    if(id0folders.size() != 1) throw std::invalid_argument("No ID0 folder, or more than one ID0 folder detected.\n");
+    id0 = id0folders[0];
+    for (const auto& dirEntry : fs::directory_iterator(id0)) {
+        if(fs::is_directory(dirEntry.path())) {
+            std::string foldername = dirEntry.path().filename().string();
+            if (foldername.size() == 32) id1folders.push_back(dirEntry.path());
+        }
+    };
+    if(id1folders.size() != 1) throw std::invalid_argument("No ID1 folder, or more than one ID1 folder detected.\n");
+    id1 = id1folders[0];
+    fs::path titlefolder = id1.string() + "/title/00040000";
+    for (const auto& dirEntry : fs::directory_iterator(titlefolder)) if(fs::is_directory(dirEntry.path())) tidlow.push_back(dirEntry.path().filename().string());
+    for(int i=0;i<tidlow.size();i++) tidlow[i] = tidlow[i].substr(1, tidlow[i].size()-3);
+
     return true;
 }
-
