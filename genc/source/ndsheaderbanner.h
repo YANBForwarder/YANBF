@@ -29,14 +29,20 @@
 
 ---------------------------------------------------------------------------------*/
 
+#ifndef NDS_HEADER_BANNER
+#define NDS_HEADER_BANNER
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
 
+#ifndef u8
 #define u8 uint8_t
+#endif
+#ifndef u16
 #define u16 uint16_t
+#endif
+#ifndef u32
 #define u32 uint32_t
+#endif
 
 typedef struct {
 	char gameTitle[12];			//!< 12 characters for the game title.
@@ -176,6 +182,4 @@ typedef enum {
 	NDS_BANNER_SIZE_DSi			= 0x23C0,
 } sNDSBannerSize;
 
-#ifdef __cplusplus
-}
-#endif
+#endif // NDS_HEADER_BANNER

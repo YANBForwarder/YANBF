@@ -23,7 +23,9 @@
 extern "C" {
 #endif
 
-bool bannerpng(const char *input, const char *output);
+#include "ndsheaderbanner.h"
+
+bool bannerpng(const sNDSBannerExt *banner, const char *output);
 
 #ifdef __cplusplus
 }

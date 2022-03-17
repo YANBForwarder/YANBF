@@ -55,5 +55,9 @@ int main(int argc, char** argv) {
         return 1;
     }
     forwarder.gettitle();
+    if(!forwarder.geticon()) {
+        std::cerr << "Failed to save icon." << std::endl;
+        return 1;
+    };
     return 0;
 }
