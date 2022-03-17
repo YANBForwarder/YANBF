@@ -45,10 +45,15 @@ int main(int argc, char** argv) {
     } catch(const std::runtime_error& err) {
         std::cerr << err.what() << std::endl;
         std::cerr << parser;
-        std::exit(1);
+        return 1;
     }
     Forwarder forwarder(parser.get<std::string>("input"));
 
-    std::cout << forwarder.getroot() << std::endl;
+    try {
+        forwarder.collisioncheck();
+    } catch(const std::invalid_argument& err) {
+        std::cerr << err.what() << std::endl;
+        return 1;
+    }
     return 0;
 }
