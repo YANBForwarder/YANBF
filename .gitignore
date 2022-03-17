@@ -11,6 +11,8 @@
 *.exe
 *.zip
 *.bin
+*.gz
+*.xz
 __pycache__
 dist
 build
