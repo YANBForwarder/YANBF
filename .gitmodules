@@ -1,0 +1,3 @@
+[submodule "genc/imagemagick"]
+	path = genc/imagemagick
+	url = https://github.com/ImageMagick/ImageMagick
