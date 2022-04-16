@@ -153,7 +153,7 @@ jobs:
           chmod +x YANBF/generator/generator YANBF/generator/makerom YANBF/generator/bannertool
           mkdir actions
           cd YANBF
-          zip -r ../actions/YANBF-macOS.zip *
+          zip -r ../actions/YANBF-Linux.zip *
       - name: Publish
         uses: actions/upload-artifact@v2
         with:
