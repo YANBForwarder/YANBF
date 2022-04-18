@@ -18,7 +18,7 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
         - the bootloader does the same thing as the DSiWare template, in actuality
 
 ## How to use:
-1. Go to https://github.com/lifehackerhansol/YANBF/releases, and download the appropriate zip file for your PC OS
+1. Go to https://github.com/YANBForwarder/YANBF/releases, and download the appropriate zip file for your PC OS
 1. Go to https://github.com/RocketRobz/NTR_Forwarder/releases, and download the zip file that is not the source code
 1. Extract the zip files
 1. From the DS Game Forwarder Pack, copy everything in the for SD card root folder to your SD card root
