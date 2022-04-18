@@ -53,7 +53,7 @@ jobs:
           curl -LJO "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-win_x86_64.zip"
           unzip makerom-v0.18-win_x86_64.zip
           mv -f makerom.exe YANBF/generator/makerom.exe
-          curl -LJO "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.exe"
+          curl -LJO "https://github.com/YANBForwarder/GUI/releases/latest/download/YANBF-GUI.exe"
           mv -f YANBF-GUI.exe YANBF/generator/YANBF-GUI.exe
           cd YANBF/generator
           py setup.py build
@@ -94,7 +94,7 @@ jobs:
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-macos_x86_64.zip"
           unzip makerom-v0.18-macos_x86_64.zip
           mv -f makerom YANBF/generator/makerom
-          wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.dmg"
+          wget "https://github.com/YANBForwarder/GUI/releases/latest/download/YANBF-GUI.dmg"
           mv -f YANBF-GUI.dmg YANBF/generator/YANBF-GUI.dmg
           cd YANBF/generator
           pyinstaller --onefile generator.py
@@ -141,7 +141,7 @@ jobs:
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-ubuntu_x86_64.zip"
           unzip makerom-v0.18-ubuntu_x86_64.zip
           mv -f makerom YANBF/generator/makerom
-          wget "https://github.com/lifehackerhansol/Simple-Web-App-GUI-for-YANBF-Generator/releases/latest/download/YANBF-GUI.AppImage"
+          wget "https://github.com/YANBForwarder/GUI/releases/latest/download/YANBF-GUI.AppImage"
           mv -f YANBF-GUI.AppImage YANBF/generator/YANBF-GUI.AppImage
           cd YANBF/generator
           pyinstaller --onefile generator.py
