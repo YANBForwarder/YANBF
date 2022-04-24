@@ -90,7 +90,6 @@ if __name__ == "__main__":
     execute(core.makesmdh(cmdarg, path, title))
     print("Checking API if a custom banner or sound is provided...")
     downloadedfiles = execute(core.downloadfromapi(path, boxart, sound))
-    print(downloadedfiles)
     if downloadedfiles in [1, 2]:
         sound = "data/customsound.wav"
     if downloadedfiles not in [1, 3]:

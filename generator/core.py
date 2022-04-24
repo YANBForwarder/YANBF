@@ -248,36 +248,28 @@ def downloadfromapi(path, boxart=None, sound=None):
 
 def downloadboxart(path, boxart=None):
     # get boxart for DS, to make banner
+    gametdbregions = {
+        'D': "DE",
+        'E': "US",
+        'F': "FR",
+        'H': "NL",
+        'I': "IT",
+        'J': "JA",
+        'K': "KO",
+        'R': "RU",
+        'S': "ES",
+        'T': "US",
+        'U': "AU",
+        '#': "HB"
+    }
     gamecode = getgamecode(path)
     if not boxart:
-        ba_region = ""
-        if gamecode[3] in ['E', 'T']:
-            ba_region = "US"
-        elif gamecode[3] == 'K':
-            ba_region = "KO"
-        elif gamecode[3] == 'J':
-            ba_region = "JA"
-        elif gamecode[3] == 'D':
-            ba_region = "DE"
-        elif gamecode[3] == 'F':
-            ba_region = "FR"
-        elif gamecode[3] == 'H':
-            ba_region = "NL"
-        elif gamecode[3] == 'I':
-            ba_region = "IT"
-        elif gamecode[3] == 'R':
-            ba_region = "RU"
-        elif gamecode[3] == 'S':
-            ba_region = "ES"
-        elif gamecode[3] == '#':
-            ba_region = "HB"
-        elif gamecode[3] == 'U':
-            ba_region = "AU"
-        else:
-            ba_region = "EN"
+        ba_region = gametdbregions[gamecode[3]] if gamecode[3] in gametdbregions else "EN"
         r = requests.get(f"https://art.gametdb.com/ds/coverM/{ba_region}/{gamecode}.jpg")
         if r.status_code != 200:
-            return "Cannot find box art for game. Are you connected to the internet?"
+            r = requests.get(f"https://art.gametdb.com/ds/coverM/EN/{gamecode}.jpg")
+            if r.status_code != 200:
+                return "Cannot find box art for game. Are you connected to the internet?"
     else:
         if not os.path.isfile(boxart):
             return f"{boxart} does not exist. Is your argument correct?"
