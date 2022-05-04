@@ -22,7 +22,8 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
 1. Go to https://github.com/RocketRobz/NTR_Forwarder/releases, and download the zip file that is not the source code
 1. Extract the zip files
 1. From the DS Game Forwarder Pack, copy everything in the for SD card root folder to your SD card root
-1. From YANBF, copy bootstrap.cia to your SD card root
+1. From YANBF, copy bootstrap.cia to the `sd:/cias` folder
+    - If this folder doesn't exist, make one
 1. Download the latest TWiLight Menu++ version [here](https://github.com/DS-Homebrew/TWiLightMenu/releases). Only get the `3DS.7z` file
 1. In the 7z file, go to `_nds`, `TWiLightMenu`, and `extras`
 1. Drag the `apfix.pck` and `widescreen.pck` file to `sd:/_nds/ntr-forwarder/`
