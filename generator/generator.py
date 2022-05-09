@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 YANBF
 Copyright © 2022-present lifehackerhansol
@@ -24,80 +22,355 @@ THE SOFTWARE.
 """
 
 import argparse
+import json
 import os
+import requests
+import subprocess
+import unicodedata
+from struct import unpack
 from sys import exit
+from typing import Optional
 
-import core
+from PIL import Image
+
+from bannergif import bannergif
 
 
-def execute(error):
-    if isinstance(error, int) or isinstance(error, list):
-        return error
-    else:
-        print(error)
-    files = ['data/icon.png',
-             'data/banner.bin',
-             'data/output.smdh',
-             'data/banner.png',
-             'data/customsound.wav']
-    for file in files:
+class Generator():
+    def __init__(self, infile: str, *, boxart: Optional[str], output: Optional[str], sound: Optional[str], path: Optional[str]):
+        self.boxart = boxart
+        self.infile = infile
+        self.output = output
+        self.sound = sound
+        self.path = path if path else infile
+        self.cmdarg = ""
+        if os.name != "nt":
+            self.cmdarg = "./"
+
+    title: dict = None
+    gamecode: str = None
+    boxartcustom: bool = False
+    uniqueid: int = None
+
+    def makeicon(self):
+        im = bannergif(self.infile)
+        im.putpalette(b"\xFF\xFF\xFF" + im.palette.palette[3:])
+        im = im.convert('RGB')
+        im = im.resize((48, 48), resample=Image.LINEAR)
+        im.save('data/icon.png')
+        return 0
+
+    # GBATEK swiCRC16 pseudocode
+    # https://problemkaputt.de/gbatek-bios-misc-functions.htm
+    def crc16(self, data):
+        crc = 0xFFFF
+        for byte in bytearray(data):
+            crc ^= byte
+            for i in range(8):
+                carry = (crc & 0x0001) > 0
+                crc = crc >> 1
+                if carry:
+                    crc = crc ^ 0xA001
+        return crc
+
+    def get_title(self) -> dict:
+        # get banner title
+        rom = open(self.infile, "rb")
+        rom.seek(0x68, 0)
+        banneraddrle = rom.read(4)
+        banneraddr = unpack("<I", banneraddrle)[0]
+        rom.seek(banneraddr, 0)
+        bannerversion = unpack("<H", rom.read(2))[0] & 3
+        langnum = 6
+        if bannerversion == 2:
+            langnum = 7
+        elif bannerversion == 3:
+            langnum = 8
+
+        # crc checking, ignore banner version 1
+        if bannerversion >= 2:
+            rom.seek(banneraddr + 0x4)
+            crc093F = unpack("<H", rom.read(2))[0]
+            rom.seek(banneraddr + 0x20)
+            data = rom.read(0x940 - 0x20)
+            calcrc = self.crc16(data)
+            if crc093F != calcrc:
+                langnum = 6
+            else:
+                if bannerversion == 3:
+                    rom.seek(banneraddr + 0x6)
+                    crc0A3F = unpack("<H", rom.read(2))[0]
+                    rom.seek(banneraddr + 0x20)
+                    data = rom.read(0xA40 - 0x20)
+                    calcrc = self.crc16(data)
+                    if crc0A3F != calcrc:
+                        langnum = 7
+        title = []
+        titles = {}
+        for x in range(langnum):
+            offset = 0x240 + (0x100 * x)
+            rom.seek(banneraddr + offset, 0)
+            title.append(str(rom.read(0x100), "utf-16-le"))
+            title[x] = title[x].split('\0', 1)[0]
+        titles['jpn'] = title[0].split('\n')
+        titles['eng'] = title[1].split('\n')
+        titles['fra'] = title[2].split('\n')
+        titles['ger'] = title[3].split('\n')
+        titles['ita'] = title[4].split('\n')
+        titles['spa'] = title[5].split('\n')
+        if langnum >= 7:
+            titles['chn'] = title[6].split("\n")
+        if langnum >= 8:
+            titles['kor'] = title[7].split("\n")
+        for lang in titles:
+            if len(titles[lang]) == 1:
+                titles[lang] = None
+        self.title = titles
+        return 0
+
+    def makesmdh(self):
+        bannertoolarg = f'{self.cmdarg}bannertool makesmdh -i "data/icon.png" '
+        title = self.title
+
+        if len(title['eng']) == 3:
+            bannertoolarg += f'-s "{title["eng"][0]} {title["eng"][1]}" -l "{title["eng"][0]} {title["eng"][1]}" -p "{title["eng"][2]}" '
+        else:
+            bannertoolarg += f'-s "{title["eng"][0]}" -l "{title["eng"][0]}" -p "{title["eng"][1]}" '
+
+        if title['jpn'] is not None:
+            if len(title['jpn']) == 3:
+                bannertoolarg += f'-js "{title["jpn"][0]} {title["jpn"][1]}" -jl "{title["jpn"][0]} {title["jpn"][1]}" -jp "{title["jpn"][2]}" '
+            else:
+                bannertoolarg += f'-js "{title["jpn"][0]}" -jl "{title["jpn"][0]}" -jp "{title["jpn"][1]}" '
+
+        if title['fra'] is not None:
+            if len(title['fra']) == 3:
+                bannertoolarg += f'-fs "{title["fra"][0]} {title["fra"][1]}" -fl "{title["fra"][0]} {title["fra"][1]}" -fp "{title["fra"][2]}" '
+            else:
+                bannertoolarg += f'-fs "{title["fra"][0]}" -fl "{title["fra"][0]}" -fp "{title["fra"][1]}" '
+
+        if title['ger'] is not None:
+            if len(title['ger']) == 3:
+                bannertoolarg += f'-gs "{title["ger"][0]} {title["ger"][1]}" -gl "{title["ger"][0]} {title["ger"][1]}" -gp "{title["ger"][2]}" '
+            else:
+                bannertoolarg += f'-gs "{title["ger"][0]}" -gl "{title["ger"][0]}" -gp "{title["ger"][1]}" '
+
+        if title['ita'] is not None:
+            if len(title['ita']) == 3:
+                bannertoolarg += f'-is "{title["ita"][0]} {title["ita"][1]}" -il "{title["ita"][0]} {title["ita"][1]}" -ip "{title["ita"][2]}" '
+            else:
+                bannertoolarg += f'-is "{title["ita"][0]}" -il "{title["ita"][0]}" -ip "{title["ita"][1]}" '
+
+        if title['spa'] is not None:
+            if len(title['spa']) == 3:
+                bannertoolarg += f'-ss "{title["spa"][0]} {title["spa"][1]}" -sl "{title["spa"][0]} {title["spa"][1]}" -sp "{title["spa"][2]}" '
+            else:
+                bannertoolarg += f'-ss "{title["spa"][0]}" -sl "{title["spa"][0]}" -sp "{title["spa"][1]}" '
+
+        if 'chn' in title and title['chn'] is not None:
+            if len(title['chn']) == 3:
+                bannertoolarg += f'-scs "{title["chn"][0]} {title["chn"][1]}" -scl "{title["chn"][0]} {title["chn"][1]}" -scp "{title["chn"][2]}" '
+            else:
+                bannertoolarg += f'-scs "{title["chn"][0]}" -scl "{title["chn"][0]}" -scp "{title["chn"][1]}" '
+
+        if 'kor' in title and title['kor'] is not None:
+            if len(title['kor']) == 3:
+                bannertoolarg += f'-ks "{title["kor"][0]} {title["kor"][1]}" -kl "{title["kor"][0]} {title["kor"][1]}" -kp "{title["kor"][2]}" '
+            else:
+                bannertoolarg += f'-ks "{title["kor"][0]}" -kl "{title["kor"][0]}" -kp "{title["kor"][1]}" '
+
+        bannertoolarg += '-o "data/output.smdh"'
+        bannertoolrun = subprocess.run(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        if bannertoolrun.returncode != 0:
+            print(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
+            exit()
+        return 0
+
+    def getgamecode(self):
+        rom = open(self.infile, "rb")
+        rom.seek(0xC, 0)
+        code = str(rom.read(0x4), "ascii")
+        rom.close()
+        self.gamecode = code
+        return 0
+
+    def downloadfromapi(self):
+        r = requests.get(f"https://yanbf.api.hansol.ca/banner/{self.gamecode}")
+        if r.status_code == 200:
+            data = r.json()
+            if not self.boxart:
+                if 'image' in data:
+                    r = requests.get(data['image'])
+                    if r.status_code == 200:
+                        with open("data/banner.png", 'wb') as f:
+                            f.write(r.content)
+                        self.boxart = os.path.abspath("data/banner.png")
+                        self.boxartcustom = True
+            if not self.sound:
+                if 'sound' in data:
+                    r = requests.get(data['sound'])
+                    if r.status_code == 200:
+                        with open("data/customsound.wav", 'wb'):
+                            f.write(r.content)
+                        self.sound = os.path.abspath("data/customsound.wav")
+        return 0
+
+    def downloadboxart(self):
+        # get boxart for DS, to make banner
+        gametdbregions = {
+            'D': "DE",
+            'E': "US",
+            'F': "FR",
+            'H': "NL",
+            'I': "IT",
+            'J': "JA",
+            'K': "KO",
+            'R': "RU",
+            'S': "ES",
+            'T': "US",
+            'U': "AU",
+            '#': "HB"
+        }
+        ba_region = gametdbregions[self.gamecode[3]] if self.gamecode[3] in gametdbregions else "EN"
+        r = requests.get(f"https://art.gametdb.com/ds/coverM/{ba_region}/{self.gamecode}.jpg")
+        if r.status_code != 200:
+            r = requests.get(f"https://art.gametdb.com/ds/coverM/EN/{self.gamecode}.jpg")
+            if r.status_code != 200:
+                return 1
+        with open("data/boxart.jpg", "wb") as f:
+            f.write(r.content)
+        self.boxart = os.path.abspath("data/boxart.jpg")
+        return 0
+
+    def resizebanner(self):
+        banner = Image.open(self.boxart)
+        width, height = banner.size
+        new_height = 128
+        new_width = new_height * width // height
+        banner = banner.resize((new_width, new_height), resample=Image.ANTIALIAS)
+        new_image = Image.new('RGBA', (256, 128), (0, 0, 0, 0))
+        upper = (256 - banner.size[0]) // 2
+        new_image.paste(banner, (upper, 0))
+        new_image.save('data/banner.png', 'PNG')
+        self.boxart = os.path.abspath("data/banner.png")
+
+    def makebanner(self):
+        bannertoolrun = subprocess.run(f"{self.cmdarg}bannertool makebanner -i {self.boxart} -a {self.sound} -o data/banner.bin", shell=True, capture_output=True, universal_newlines=True)
+        if bannertoolrun.returncode != 0:
+            print(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
+            exit()
+        return 0
+
+    def makeromfs(root, path):
         try:
-            os.remove(file)
-        except FileNotFoundError:
-            continue
-    exit()
+            os.mkdir('romfs')
+        except FileExistsError:
+            pass
+        romfs = open('romfs/path.txt', 'w', encoding="utf8")
+        path = unicodedata.normalize("NFC", os.path.abspath(path))
+        path = path.replace(root, "")
+        if os.name == 'nt':
+            path = path.replace('\\', '/')
+        romfs.write(f"sd:{path}")
+        romfs.close()
+        return 0
+
+    def makeuniqueid(self):
+        with open("id.json", "r") as f:
+            idlist = json.load(f)
+        # we are going to use the 0xFF400-0xFF7FF range
+        if not idlist:
+            self.uniqueid = 0xFF400
+            return 0
+        for index in range(0xFF7FF - 0xFF400):
+            self.uniqueid = 0xFF400 + index
+            if self.uniqueid not in idlist:
+                break
+        return 0
+
+    def makecia(self):
+        makeromarg = f"{self.cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 5 -micro 0 -DAPP_VERSION_MAJOR=1 -o {self.output}"
+        makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{self.gamecode} -DAPP_TITLE="{self.title["eng"][0]}" -DAPP_UNIQUE_ID=0x{self.uniqueid}'
+        makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
+        if makeromrun.returncode != 0:
+            print(f"{makeromrun.stdout}\n{makeromrun.stderr}")
+            exit()
+        with open("id.json", "r") as f:
+            idlist = json.load(f)
+        idlist.append(self.uniqueid)
+        with open("id.json", "w") as f:
+            json.dump(idlist, f)
+        return 0
+
+    def start(self):
+        if not os.path.exists(os.path.abspath(self.infile)):
+            print("Failed to open ROM. Is the path valid?")
+            exit()
+        if not self.path:
+            print("Custom path is not provided. Using path for input file.")
+            self.path = os.path.abspath(self.infile)
+            if os.name == "nt":
+                self.path = self.path[:2]
+        if not self.output:
+            self.output = f"{self.infile}.cia"
+        print("Getting gamecode...")
+        self.getgamecode()
+        print("Extracting and resizing icon...")
+        self.makeicon()
+        print("Getting ROM titles...")
+        self.get_title()
+        print("Creating SMDH...")
+        self.makesmdh()
+        if not self.boxart or not self.sound:
+            print("Checking API if a custom banner or sound is provided...")
+            self.downloadfromapi()
+            if not self.sound:
+                self.sound = os.path.abspath("data/dsboot.wav")
+            if not self.boxart:
+                print("No banner provided. Checking GameTDB for standard boxart...")
+                self.downloadboxart()
+        if not self.boxart:
+            print("Banner was not found. Exiting.")
+            exit()
+        if not self.boxartcustom:
+            print("Resizing banner...")
+            self.resizebanner()
+        print("Creating banner...")
+        self.makebanner()
+        print("Creating romfs...")
+        self.makeromfs()
+        print("Generating UniqueID...")
+        self.makeuniqueid()
+        print("Running makerom...")
+        self.makecia()
+        print("CIA generated.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YANBF Generator")
     parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
-    parser.add_argument("-o", "--output", metavar="input.nds.cia", type=str, nargs=1, help="output CIA (defaults to sd:/cias/(rom filename).cia)")
+    parser.add_argument("-p", metavar="<custom path>.nds", type=str, nargs=1, help="Custom ROM path")
+    parser.add_argument("-o", "--output", metavar="input.nds.cia", type=str, nargs=1, help="output CIA")
     parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, help="Custom banner box art")
     parser.add_argument("-s", "--sound", metavar="sound.wav", type=str, nargs=1, help="Custom icon sound (WAV only)")
-    parser.add_argument("-r", "--randomize", action='store_true', help="Randomize UniqueID")
 
     args = parser.parse_args()
+    infile = None
     path = None
     boxart = None
     output = None
     sound = None
-    randomize = False
     tidlow = None
     if args.boxart:
         boxart = args.boxart[0]
     if args.input:
-        path = args.input[0]
+        infile = args.input[0]
     if args.output:
         output = args.output[0]
-    if args.randomize:
-        randomize = True
     if args.sound:
         sound = args.sound[0]
-    if not os.path.exists(os.path.abspath(path)):
-        print("Failed to open ROM. Is the path valid?")
-        exit()
-    cmdarg = ""
-    if os.name != 'nt':
-        cmdarg = "./"
-    root = core.getroot(path)
-    tidlow = core.collisioncheck(root, path)
-    execute(tidlow)
-    print("Extracting and resizing icon...")
-    core.makeicon(path)
-    print("Getting ROM titles...")
-    title = core.get_title(path)
-    print("Creating SMDH...")
-    execute(core.makesmdh(cmdarg, path, title))
-    print("Checking API if a custom banner or sound is provided...")
-    downloadedfiles = execute(core.downloadfromapi(path, boxart, sound))
-    if downloadedfiles in [1, 2]:
-        sound = "data/customsound.wav"
-    if downloadedfiles not in [1, 3]:
-        print("Getting standard boxart...")
-        execute(core.downloadboxart(path, boxart))
-    print("Creating banner...")
-    execute(core.makebanner(cmdarg, path, sound))
-    print("Getting filepath...")
-    execute(core.makeromfs(root, path))
-    print("Running makerom...")
-    execute(core.makecia(cmdarg, root, path, title, output, randomize, tidlow))
+    if args.path:
+        path = args.path[0]
+
+    generator = Generator(infile, boxart=boxart, output=output, sound=sound, path=path)
+    generator.start()
