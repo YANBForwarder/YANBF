@@ -284,42 +284,24 @@ class Generator():
 
     def makeuniqueid(self):
         try:
-            f = open("id.json", "r")
+            f = open("id.txt", "r")
         except FileNotFoundError:
             self.uniqueid = 0xFF400
             return 0
-        idlist = json.load(f)
         # we are going to use the 0xFF400-0xFF7FF range
-        if not idlist:
-            self.uniqueid = 0xFF400
-            return 0
-        for index in range(0xFF7FF - 0xFF400):
-            self.uniqueid = 0xFF400 + index
-            if self.uniqueid not in idlist:
-                break
+        index = int(f.read())
+        self.uniqueid = 0xFF400 + index + 1
         return 0
 
     def makecia(self):
         makeromarg = f'{self.cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 5 -micro 0 -DAPP_VERSION_MAJOR=1 -o "{self.output}" '
         makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{self.gamecode} -DAPP_TITLE="{self.title["eng"][0]}" -DAPP_UNIQUE_ID={self.uniqueid}'
-        print(makeromarg)
         makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
         if makeromrun.returncode != 0:
             self.message(f"{makeromrun.stdout}\n{makeromrun.stderr}")
             exit()
-        if not os.path.exists("id.json"):
-            with open("id.json", "w") as f:
-                idlist = [self.uniqueid]
-                json.dump(idlist, f)
-                return 0
-        else:
-            with open("id.json", "r") as f:
-                idlist = json.load(f)
-            if not idlist:
-                idlist = []
-            idlist.append(self.uniqueid)
-            with open("id.json", "w") as f:
-                json.dump(idlist, f)
+        with open("id.txt", "w") as f:
+            f.write(str(self.uniqueid - 0xFF400))
         return 0
 
     def start(self):
