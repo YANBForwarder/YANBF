@@ -24,7 +24,20 @@ import struct
 from io import SEEK_CUR
 from PIL import Image
 
-from generator.generator import crc16
+
+# GBATEK swiCRC16 pseudocode
+# https://problemkaputt.de/gbatek-bios-misc-functions.htm
+def crc16(self, data) -> int:
+    crc = 0xFFFF
+    for byte in bytearray(data):
+        crc ^= byte
+        for i in range(8):
+            carry = (crc & 0x0001) > 0
+            crc = crc >> 1
+            if carry:
+                crc = crc ^ 0xA001
+    return crc
+
 
 def bannergif(path):
     if path == "":

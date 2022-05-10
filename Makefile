@@ -44,6 +44,7 @@ bootstub: data
 
 data:
 	@mkdir -p universal/data
+
 clean:
 	@echo clean build directories
 	@$(MAKE) -C forwarder clean

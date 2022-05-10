@@ -33,7 +33,7 @@ from typing import Optional
 
 from PIL import Image
 
-from bannergif import bannergif
+from bannergif import bannergif, crc16
 
 
 class Generator():
@@ -64,19 +64,6 @@ class Generator():
         im.save('data/icon.png')
         return 0
 
-    # GBATEK swiCRC16 pseudocode
-    # https://problemkaputt.de/gbatek-bios-misc-functions.htm
-    def crc16(self, data) -> int:
-        crc = 0xFFFF
-        for byte in bytearray(data):
-            crc ^= byte
-            for i in range(8):
-                carry = (crc & 0x0001) > 0
-                crc = crc >> 1
-                if carry:
-                    crc = crc ^ 0xA001
-        return crc
-
     def get_title(self) -> dict:
         # get banner title
         rom = open(self.infile, "rb")
@@ -97,7 +84,7 @@ class Generator():
             crc093F = unpack("<H", rom.read(2))[0]
             rom.seek(banneraddr + 0x20)
             data = rom.read(0x940 - 0x20)
-            calcrc = self.crc16(data)
+            calcrc = crc16(data)
             if crc093F != calcrc:
                 langnum = 6
             else:
@@ -106,7 +93,7 @@ class Generator():
                     crc0A3F = unpack("<H", rom.read(2))[0]
                     rom.seek(banneraddr + 0x20)
                     data = rom.read(0xA40 - 0x20)
-                    calcrc = self.crc16(data)
+                    calcrc = crc16(data)
                     if crc0A3F != calcrc:
                         langnum = 7
         title = []
