@@ -16,6 +16,7 @@ dist
 build
 universal/data
 generator/romfs/path.txt
+generator/id.txt
 generator/output
 bannertool*
 makerom*
