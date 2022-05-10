@@ -21,11 +21,10 @@ THE SOFTWARE.
 """
 
 import struct
-
 from io import SEEK_CUR
-from libscrc import modbus
 from PIL import Image
 
+from generator.generator import crc16
 
 def bannergif(path):
     if path == "":
@@ -43,7 +42,7 @@ def bannergif(path):
     if version & 0x100:
         rom.seek(bannerOfs + 0x1240)
         data = rom.read(0x1180)
-        if dsiChecksum != modbus(data):
+        if dsiChecksum != crc16(data):
             print("Warning: DSi icon checksum failed, using DS icon")
             version &= ~0x100
 
