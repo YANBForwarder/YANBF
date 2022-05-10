@@ -42,7 +42,7 @@ class Generator():
         self.infile = infile
         self.output = output
         self.sound = sound
-        self.path = path if path else infile
+        self.path = path
         self.cmdarg = ""
         if os.name != "nt":
             self.cmdarg = "./"
@@ -269,6 +269,7 @@ class Generator():
         path = path.replace(root, "")
         if os.name == 'nt':
             path = path.replace('\\', '/')
+        print(path)
         return path
 
     def makeromfs(self):
