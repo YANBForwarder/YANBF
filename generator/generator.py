@@ -54,7 +54,7 @@ class Generator():
 
     def message(self, output: str):
         """Outputting text. Defaults to print(). Can be replaced with other frontends (i.e. a GUI?)"""
-        print(output)
+        return print(output)
 
     def makeicon(self):
         im = bannergif(self.infile)
