@@ -353,7 +353,7 @@ class Generator():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YANBF Generator")
     parser.add_argument("input", metavar="input.nds", type=str, nargs=1, help="DS ROM path")
-    parser.add_argument("-p", metavar="<custom path>.nds", type=str, nargs=1, help="Custom ROM path")
+    parser.add_argument("-p", "--path", metavar="<custom path>.nds", type=str, nargs=1, help="Custom ROM path")
     parser.add_argument("-o", "--output", metavar="input.nds.cia", type=str, nargs=1, help="output CIA")
     parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, help="Custom banner box art")
     parser.add_argument("-s", "--sound", metavar="sound.wav", type=str, nargs=1, help="Custom icon sound (WAV only)")
