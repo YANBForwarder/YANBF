@@ -52,6 +52,10 @@ class Generator():
     boxartcustom: bool = False
     uniqueid: int = None
 
+    def message(self, output: str):
+        """Outputting text. Defaults to print(). Can be replaced with other frontends (i.e. a GUI?)"""
+        print(output)
+
     def makeicon(self):
         im = bannergif(self.infile)
         im.putpalette(b"\xFF\xFF\xFF" + im.palette.palette[3:])
@@ -182,7 +186,7 @@ class Generator():
         bannertoolarg += '-o "data/output.smdh"'
         bannertoolrun = subprocess.run(bannertoolarg, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         if bannertoolrun.returncode != 0:
-            print(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
+            self.message(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
             exit()
         return 0
 
@@ -257,21 +261,36 @@ class Generator():
     def makebanner(self):
         bannertoolrun = subprocess.run(f"{self.cmdarg}bannertool makebanner -i {self.boxart} -a {self.sound} -o data/banner.bin", shell=True, capture_output=True, universal_newlines=True)
         if bannertoolrun.returncode != 0:
-            print(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
+            self.message(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
             exit()
         return 0
 
-    def makeromfs(root, path):
+    def getrompath(self, path) -> str:
+        root: str = ""
+        if os.name == 'nt':
+            root = os.path.abspath(path)[:2]
+        else:
+            temp = path
+            orig_dev = os.stat(temp).st_dev
+            while temp != '/':
+                direc = os.path.dirname(temp)
+                if os.stat(direc).st_dev != orig_dev:
+                    break
+                temp = direc
+            root = temp
+        path = unicodedata.normalize("NFC", os.path.abspath(path))
+        path = path.replace(root, "")
+        if os.name == 'nt':
+            path = path.replace('\\', '/')
+        return path
+
+    def makeromfs(self):
         try:
             os.mkdir('romfs')
         except FileExistsError:
             pass
         romfs = open('romfs/path.txt', 'w', encoding="utf8")
-        path = unicodedata.normalize("NFC", os.path.abspath(path))
-        path = path.replace(root, "")
-        if os.name == 'nt':
-            path = path.replace('\\', '/')
-        romfs.write(f"sd:{path}")
+        romfs.write(f"sd:{self.path}")
         romfs.close()
         return 0
 
@@ -293,7 +312,7 @@ class Generator():
         makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{self.gamecode} -DAPP_TITLE="{self.title["eng"][0]}" -DAPP_UNIQUE_ID=0x{self.uniqueid}'
         makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
         if makeromrun.returncode != 0:
-            print(f"{makeromrun.stdout}\n{makeromrun.stderr}")
+            self.message(f"{makeromrun.stdout}\n{makeromrun.stderr}")
             exit()
         with open("id.json", "r") as f:
             idlist = json.load(f)
@@ -304,46 +323,44 @@ class Generator():
 
     def start(self):
         if not os.path.exists(os.path.abspath(self.infile)):
-            print("Failed to open ROM. Is the path valid?")
+            self.message("Failed to open ROM. Is the path valid?")
             exit()
         if not self.path:
-            print("Custom path is not provided. Using path for input file.")
-            self.path = os.path.abspath(self.infile)
-            if os.name == "nt":
-                self.path = self.path[:2]
+            self.message("Custom path is not provided. Using path for input file.")
+            self.path = self.getrompath(os.path.abspath(self.infile))
         if not self.output:
             self.output = f"{self.infile}.cia"
-        print("Getting gamecode...")
+        self.message("Getting gamecode...")
         self.getgamecode()
-        print("Extracting and resizing icon...")
+        self.message("Extracting and resizing icon...")
         self.makeicon()
-        print("Getting ROM titles...")
+        self.message("Getting ROM titles...")
         self.get_title()
-        print("Creating SMDH...")
+        self.message("Creating SMDH...")
         self.makesmdh()
         if not self.boxart or not self.sound:
-            print("Checking API if a custom banner or sound is provided...")
+            self.message("Checking API if a custom banner or sound is provided...")
             self.downloadfromapi()
             if not self.sound:
                 self.sound = os.path.abspath("data/dsboot.wav")
             if not self.boxart:
-                print("No banner provided. Checking GameTDB for standard boxart...")
+                self.message("No banner provided. Checking GameTDB for standard boxart...")
                 self.downloadboxart()
         if not self.boxart:
-            print("Banner was not found. Exiting.")
+            self.message("Banner was not found. Exiting.")
             exit()
         if not self.boxartcustom:
-            print("Resizing banner...")
+            self.message("Resizing banner...")
             self.resizebanner()
-        print("Creating banner...")
+        self.message("Creating banner...")
         self.makebanner()
-        print("Creating romfs...")
+        self.message("Creating romfs...")
         self.makeromfs()
-        print("Generating UniqueID...")
+        self.message("Generating UniqueID...")
         self.makeuniqueid()
-        print("Running makerom...")
+        self.message("Running makerom...")
         self.makecia()
-        print("CIA generated.")
+        self.message("CIA generated.")
 
 
 if __name__ == "__main__":
