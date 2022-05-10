@@ -27,7 +27,7 @@ from PIL import Image
 
 # GBATEK swiCRC16 pseudocode
 # https://problemkaputt.de/gbatek-bios-misc-functions.htm
-def crc16(self, data) -> int:
+def crc16(data) -> int:
     crc = 0xFFFF
     for byte in bytearray(data):
         crc ^= byte
