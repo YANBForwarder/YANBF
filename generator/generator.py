@@ -230,7 +230,6 @@ class Generator():
                 return 1
         with open("data/boxart.jpg", "wb") as f:
             f.write(r.content)
-        self.boxart = os.path.abspath("data/boxart.jpg")
         return 0
 
     def resizebanner(self):
@@ -321,7 +320,6 @@ class Generator():
         self.get_title()
         self.message("Creating SMDH...")
         self.makesmdh()
-        err: int = None
         if not self.boxart or not self.sound:
             self.message("Checking API if a custom banner or sound is provided...")
             self.downloadfromapi()
@@ -329,10 +327,9 @@ class Generator():
                 self.sound = os.path.abspath("data/dsboot.wav")
             if not self.boxart:
                 self.message("No banner provided. Checking GameTDB for standard boxart...")
-                err = self.downloadboxart()
-        if err != 0 or not self.boxart:
-            self.message("Banner was not found. Exiting.")
-            exit()
+                if self.downloadboxart() != 0:
+                    self.message("Banner was not found. Exiting.")
+                    exit()
         if not self.boxartcustom:
             self.message("Resizing banner...")
             self.resizebanner()
