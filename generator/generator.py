@@ -321,6 +321,7 @@ class Generator():
         self.get_title()
         self.message("Creating SMDH...")
         self.makesmdh()
+        err: int = None
         if not self.boxart or not self.sound:
             self.message("Checking API if a custom banner or sound is provided...")
             self.downloadfromapi()
@@ -328,8 +329,8 @@ class Generator():
                 self.sound = os.path.abspath("data/dsboot.wav")
             if not self.boxart:
                 self.message("No banner provided. Checking GameTDB for standard boxart...")
-                self.downloadboxart()
-        if not self.boxart:
+                err = self.downloadboxart()
+        if err != 0 or not self.boxart:
             self.message("Banner was not found. Exiting.")
             exit()
         if not self.boxartcustom:
