@@ -243,6 +243,7 @@ class Generator():
         upper = (256 - banner.size[0]) // 2
         new_image.paste(banner, (upper, 0))
         new_image.save('data/banner.png', 'PNG')
+        return 0
 
     def makebanner(self):
         bannertoolrun = subprocess.run(f"{self.cmdarg}bannertool makebanner -i data/banner.png -a {self.sound} -o data/banner.bin", shell=True, capture_output=True, universal_newlines=True)
