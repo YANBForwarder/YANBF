@@ -193,16 +193,18 @@ class Generator():
                 if 'image' in data:
                     r = requests.get(data['image'])
                     if r.status_code == 200:
-                        with open("data/banner.png", 'wb') as f:
-                            f.write(r.content)
+                        f = open("data/banner.png", "wb")
+                        f.write(r.content)
+                        f.close()
                         self.boxart = os.path.abspath("data/banner.png")
                         self.boxartcustom = True
             if not self.sound:
                 if 'sound' in data:
                     r = requests.get(data['sound'])
                     if r.status_code == 200:
-                        with open("data/customsound.wav", 'wb'):
-                            f.write(r.content)
+                        f = open("data/customsound.wav", 'wb')
+                        f.write(r.content)
+                        f.close()
                         self.sound = os.path.abspath("data/customsound.wav")
         return 0
 
@@ -228,8 +230,9 @@ class Generator():
             r = requests.get(f"https://art.gametdb.com/ds/coverM/EN/{self.gamecode}.jpg")
             if r.status_code != 200:
                 return 1
-        with open("data/boxart.jpg", "wb") as f:
-            f.write(r.content)
+        f = open("data/boxart.jpg", "wb")
+        f.write(r.content)
+        f.close()
         return 0
 
     def resizebanner(self):
@@ -299,8 +302,9 @@ class Generator():
         if makeromrun.returncode != 0:
             self.message(f"{makeromrun.stdout}\n{makeromrun.stderr}")
             exit()
-        with open("id.txt", "w") as f:
-            f.write(str(self.uniqueid - 0xFF400))
+        f = open("id.txt", "w")
+        f.write(str(self.uniqueid - 0xFF400))
+        f.close()
         return 0
 
     def start(self):
