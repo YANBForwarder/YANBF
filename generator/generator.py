@@ -245,10 +245,11 @@ class Generator():
         upper = (256 - banner.size[0]) // 2
         new_image.paste(banner, (upper, 0))
         new_image.save('data/banner.png', 'PNG')
+        self.boxart = os.path.abspath('data/banner.png')
         return 0
 
     def makebanner(self):
-        bannertoolrun = subprocess.run(f"{self.cmdarg}bannertool makebanner -i data/banner.png -a {self.sound} -o data/banner.bin", shell=True, capture_output=True, universal_newlines=True)
+        bannertoolrun = subprocess.run(f'{self.cmdarg}bannertool makebanner -i "data/banner.png" -a {self.sound} -o "data/banner.bin"', shell=True, capture_output=True, universal_newlines=True)
         if bannertoolrun.returncode != 0:
             self.message(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
             exit()
