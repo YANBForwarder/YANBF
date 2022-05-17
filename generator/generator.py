@@ -232,6 +232,7 @@ class Generator():
         f = open("data/boxart.jpg", "wb")
         f.write(r.content)
         f.close()
+        self.boxart = os.path.abspath("data/boxart.jpg")
         return 0
 
     def resizebanner(self):
