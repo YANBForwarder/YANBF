@@ -22,7 +22,6 @@ THE SOFTWARE.
 """
 
 import argparse
-import json
 import os
 import requests
 import subprocess
@@ -246,10 +245,13 @@ class Generator():
         new_image.paste(banner, (upper, 0))
         new_image.save('data/banner.png', 'PNG')
         self.boxart = os.path.abspath('data/banner.png')
+        self.message(f"Reformatted banner image: {self.boxart}")
         return 0
 
     def makebanner(self):
-        bannertoolrun = subprocess.run(f'{self.cmdarg}bannertool makebanner -i "data/banner.png" -a {self.sound} -o "data/banner.bin"', shell=True, capture_output=True, universal_newlines=True)
+        bannertoolarg = f'bannertool makebanner -i "data/banner.png" -a {self.sound} -o "data/banner.bin"'
+        self.message(f"Using arguments: {bannertoolarg}")
+        bannertoolrun = subprocess.run(f'{self.cmdarg}{bannertoolarg}', shell=True, capture_output=True, universal_newlines=True)
         if bannertoolrun.returncode != 0:
             self.message(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
             exit()
@@ -272,7 +274,7 @@ class Generator():
         path = path.replace(root, "")
         if os.name == 'nt':
             path = path.replace('\\', '/')
-        print(path)
+        self.message(f"Using ROM path: {path}")
         return path
 
     def makeromfs(self):
@@ -335,6 +337,8 @@ class Generator():
                 if self.downloadboxart() != 0:
                     self.message("Banner was not found. Exiting.")
                     exit()
+        self.message(f"Using sound file: {self.sound}")
+        self.message(f"Using banner image: {self.boxart}")
         if not self.boxartcustom:
             self.message("Resizing banner...")
             self.resizebanner()
@@ -377,3 +381,4 @@ if __name__ == "__main__":
 
     generator = Generator(infile, boxart=boxart, output=output, sound=sound, path=path)
     generator.start()
+    exit()
