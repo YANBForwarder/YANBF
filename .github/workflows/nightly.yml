@@ -54,7 +54,7 @@ jobs:
           py -m pip install cx-Freeze
       - name: Create package
         run: |
-          curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
+          curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/latest/download/bannertool.zip"
           unzip bannertool.zip
           mv -f windows-x86_64/bannertool.exe YANBF/generator/bannertool.exe
           curl -LJO "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-win_x86_64.zip"
@@ -92,7 +92,7 @@ jobs:
           python3 -m pip install pyinstaller
       - name: Create package
         run: |
-          wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
+          wget "https://github.com/Epicpkmn11/bannertool/releases/latest/download/bannertool.zip"
           unzip bannertool.zip
           cp mac-x86_64/bannertool YANBF/generator/bannertool
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-macos_x86_64.zip"
@@ -135,7 +135,7 @@ jobs:
           pip3 install pyinstaller
       - name: Create package
         run: |
-          wget "https://github.com/Epicpkmn11/bannertool/releases/download/1.2.1/bannertool.zip"
+          wget "https://github.com/Epicpkmn11/bannertool/releases/latest/download/bannertool.zip"
           unzip bannertool.zip
           cp linux-x86_64/bannertool YANBF/generator/bannertool
           wget "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.18/makerom-v0.18-ubuntu_x86_64.zip"
