@@ -275,7 +275,6 @@ class Generator():
         path = path.replace(root, "")
         if os.name == 'nt':
             path = path.replace('\\', '/')
-        self.message(f"Using ROM path: {path}")
         return path
 
     def makeromfs(self):
@@ -320,6 +319,8 @@ class Generator():
             self.path = self.getrompath(os.path.abspath(self.infile))
         if not self.output:
             self.output = f"{os.path.basename(self.infile)}.cia"
+        self.message(f"Using ROM path: {self.path}")
+        self.message(f"Output file: {self.output}")
         self.message("Getting gamecode...")
         self.getgamecode()
         self.message("Extracting and resizing icon...")
