@@ -11,7 +11,7 @@ base = None
 
 setup(
     name="generator",
-    version="1.6.0",
+    version="1.6.1",
     description="YANBF Generator",
     options={"build_exe": build_exe_options},
     executables=[Executable("generator.py", base=base)],

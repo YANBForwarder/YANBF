@@ -299,7 +299,7 @@ class Generator():
         return 0
 
     def makecia(self):
-        makeromarg = f'{self.cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 6 -micro 0 -DAPP_VERSION_MAJOR=1 -o "{self.output}" '
+        makeromarg = f'{self.cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 6 -micro 1 -DAPP_VERSION_MAJOR=1 -o "{self.output}" '
         makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{self.gamecode} -DAPP_TITLE="{self.title["eng"][0]}" -DAPP_UNIQUE_ID={self.uniqueid}'
         makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
         if makeromrun.returncode != 0:

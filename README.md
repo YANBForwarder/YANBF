@@ -47,7 +47,9 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
     - Linux: Open YANBF-GUI.AppImage
 1. Set the generator directory to the path of your `generator` folder. A file browser icon next to the input can help with this
 1. Drag and drop as many ROMs as you need on your SD card to the app
-    - These ROMs MUST BE ON YOUR SD CARD! It will fail to generate properly otherwise!
+    - If you do not have your SD card inserted in your computer, you **must** provide a custom ROM path in the drop-down options
+        - This ROM path must follow POSIX standards
+            - i.e. if your ROM on SD card is at "sd:/ROMs/ROM.nds", write `/ROMs/ROM.nds`
 1. Click the Download button to start the generation process
 1. The resulting CIA will be generated in this same folder. Copy this to the `sd:/cias` folder
 1. Boot your 3DS and install all CIAs using FBI
