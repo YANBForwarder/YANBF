@@ -271,6 +271,9 @@ class Generator():
                     break
                 temp = direc
             root = temp
+        if root == "C:" or root == "/":
+            self.message("This ROM is not on your SD card!\nPlease use a ROM on your SD card, or set a custom path.")
+            exit()
         path = unicodedata.normalize("NFC", os.path.abspath(path))
         path = path.replace(root, "")
         if os.name == 'nt':
