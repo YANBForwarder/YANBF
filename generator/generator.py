@@ -27,7 +27,7 @@ import requests
 import subprocess
 import unicodedata
 from struct import unpack
-from sys import exit
+from sys import exit, stdout
 from typing import Optional
 
 from PIL import Image
@@ -45,6 +45,10 @@ class Generator():
         self.cmdarg = ""
         if os.name != "nt":
             self.cmdarg = "./"
+
+        # Running from the GUI on Windows defaults to the system code page
+        if stdout.encoding != "utf-8":
+            stdout.reconfigure(encoding="utf-8")
 
     title: dict = None
     gamecode: str = None
