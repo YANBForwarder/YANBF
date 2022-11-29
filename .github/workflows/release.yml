@@ -21,7 +21,7 @@ jobs:
         run: |
           make dist
       - name: Publish
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: dist
           name: YANBF
@@ -33,18 +33,19 @@ jobs:
     needs: generator
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: YANBF
           path: YANBF
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
       - name: Install dependencies
         run: |
-          py -m pip install -r YANBF/generator/requirements.txt
-          py -m pip install cx-Freeze
+          python -m pip install -r YANBF/generator/requirements.txt
+          python -m pip install cx_Logging
+          python -m pip install cx-Freeze
       - name: Create package
         run: |
           curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/latest/download/bannertool.zip"
@@ -56,13 +57,13 @@ jobs:
           curl -LJO "https://github.com/YANBForwarder/GUI/releases/latest/download/YANBF-GUI.exe"
           mv -f YANBF-GUI.exe YANBF/generator/YANBF-GUI.exe
           cd YANBF/generator
-          py setup.py build
+          python setup.py build
           cp -r dist/* .
           rm -rf *.py dist __pycache__ dist requirements.txt
           cd ../..
         shell: bash
       - name: Publish
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: YANBF
           name: YANBF-Windows
@@ -74,14 +75,10 @@ jobs:
     needs: generator
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: YANBF
           path: YANBF
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
       - name: Install dependencies
         run: |
           python3 -m pip install -r YANBF/generator/requirements.txt
@@ -109,26 +106,22 @@ jobs:
           cd YANBF
           zip -r ../actions/YANBF-macOS.zip *
       - name: Publish
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: actions
           name: YANBF-macOS
 
   linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     name: Build Linux
     if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
     needs: generator
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: YANBF
           path: YANBF
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
       - name: Install dependencies
         run: |
           pip3 install -r YANBF/generator/requirements.txt
@@ -155,7 +148,7 @@ jobs:
           cd YANBF
           zip -r ../actions/YANBF-Linux.zip *
       - name: Publish
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: actions
           name: YANBF-Linux
