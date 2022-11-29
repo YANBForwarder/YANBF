@@ -172,27 +172,26 @@ class Generator():
         self.gamecode = code
         return 0
 
-    def downloadfromapi(self):
-        r = requests.get(f"https://yanbf.api.hansol.ca/banner/{self.gamecode}")
-        if r.status_code == 200:
-            data = r.json()
-            if not self.boxart:
-                if 'image' in data:
-                    r = requests.get(data['image'])
-                    if r.status_code == 200:
-                        f = open("data/banner.png", "wb")
-                        f.write(r.content)
-                        f.close()
-                        self.boxart = os.path.abspath("data/banner.png")
-                        self.boxartcustom = True
-            if not self.sound:
-                if 'sound' in data:
-                    r = requests.get(data['sound'])
-                    if r.status_code == 200:
-                        f = open("data/customsound.wav", 'wb')
-                        f.write(r.content)
-                        f.close()
-                        self.sound = os.path.abspath("data/customsound.wav")
+    def downloadfromgithub(self):
+        if not self.boxart:
+            r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode}/{self.gamecode}.png", timeout=15)
+            if r.status_code != 200:
+                r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.png", timeout=15)
+            if r.status_code == 200:
+                f = open("data/banner.png", "wb")
+                f.write(r.content)
+                f.close()
+                self.boxart = os.path.abspath("data/banner.png")
+                self.boxartcustom = True
+        if not self.sound:
+            r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode}/{self.gamecode}.wav", timeout=15)
+            if r.status_code != 200:
+                r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.wav", timeout=15)
+            if r.status_code == 200:
+                f = open("data/customsound.wav", 'wb')
+                f.write(r.content)
+                f.close()
+                self.sound = os.path.abspath("data/customsound.wav")
         return 0
 
     def downloadboxart(self):
@@ -323,7 +322,7 @@ class Generator():
         self.makesmdh()
         if not self.boxart or not self.sound:
             self.message("Checking API if a custom banner or sound is provided...")
-            self.downloadfromapi()
+            self.downloadfromgithub()
             if not self.sound:
                 self.sound = os.path.abspath("data/dsboot.wav")
             if not self.boxart:
