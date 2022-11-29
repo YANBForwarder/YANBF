@@ -18,6 +18,7 @@ universal/data
 generator/romfs/path.txt
 generator/id.txt
 generator/output
+generator/data/customsound.wav
 bannertool*
 makerom*
 venv
