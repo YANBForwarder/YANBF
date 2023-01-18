@@ -1,2 +1,2 @@
-Pillow~=9.4.0
-requests~=2.28.2
+Pillow~=9.4
+requests~=2.28
