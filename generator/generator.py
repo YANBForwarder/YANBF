@@ -362,8 +362,7 @@ class Generator():
             if len(self.versions) > 1:
                 self.selectversion()
                 self.downloadfromgithub(self.selected_version)
-            else:
-                self.downloadfromgithub()
+            self.downloadfromgithub() #again if custom version only had banner/sound
             if not self.sound:
                 self.sound = os.path.abspath("data/dsboot.wav")
             if not self.boxart:
