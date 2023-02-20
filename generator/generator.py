@@ -172,6 +172,21 @@ class Generator():
         self.gamecode = code
         return 0
 
+    def checklocalassets(self):
+        if not self.boxart:
+            if os.path.isfile(f"assets/{self.gamecode}/{self.gamecode}.png"):
+                self.boxart = os.path.abspath(f"assets/{self.gamecode}/{self.gamecode}.png")
+                self.boxartcustom = True
+            elif os.path.isfile(f"assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.png"):
+                self.boxart = os.path.abspath(f"assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.png")
+                self.boxartcustom = True
+        if  not self.sound:
+            if os.path.isfile(f"assets/{self.gamecode}/{self.gamecode}.wav"):
+                self.sound = os.path.abspath(f"assets/{self.gamecode}/{self.gamecode}.wav")
+            elif os.path.isfile(f"assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.wav"):
+                self.sound = os.path.abspath(f"assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.wav")
+        return 0
+
     def downloadfromgithub(self):
         if not self.boxart:
             r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode}/{self.gamecode}.png", timeout=15)
@@ -237,7 +252,7 @@ class Generator():
         return 0
 
     def makebanner(self):
-        bannertoolarg = f'bannertool makebanner -i "data/banner.png" -a "{self.sound}" -o "data/banner.bin"'
+        bannertoolarg = f'bannertool makebanner -i "{self.boxart}" -a "{self.sound}" -o "data/banner.bin"'
         self.message(f"Using arguments: {bannertoolarg}")
         bannertoolrun = subprocess.run(f'{self.cmdarg}{bannertoolarg}', shell=True, capture_output=True, universal_newlines=True)
         if bannertoolrun.returncode != 0:
@@ -321,15 +336,18 @@ class Generator():
         self.message("Creating SMDH...")
         self.makesmdh()
         if not self.boxart or not self.sound:
-            self.message("Checking API if a custom banner or sound is provided...")
-            self.downloadfromgithub()
-            if not self.sound:
-                self.sound = os.path.abspath("data/dsboot.wav")
-            if not self.boxart:
-                self.message("No banner provided. Checking GameTDB for standard boxart...")
-                if self.downloadboxart() != 0:
-                    self.message("Banner was not found. Exiting.")
-                    exit()
+            self.message("Checking local files for a custom banner or sound...")
+            self.checklocalassets()
+            if not self.sound or not self.boxart:
+                self.message("Checking API if a custom banner or sound is provided...")
+                self.downloadfromgithub()
+                if not self.sound:
+                    self.sound = os.path.abspath("data/dsboot.wav")
+                if not self.boxart:
+                    self.message("No banner provided. Checking GameTDB for standard boxart...")
+                    if self.downloadboxart() != 0:
+                        self.message("Banner was not found. Exiting.")
+                        exit()
         self.message(f"Using sound file: {self.sound}")
         self.message(f"Using banner image: {self.boxart}")
         if not self.boxartcustom:
@@ -367,6 +385,8 @@ if __name__ == "__main__":
         infile = args.input[0]
     if args.output:
         output = args.output[0]
+    else:
+        output = f"output/{os.path.basename(args.input[0])}.cia" #should be safe since infile is required
     if args.sound:
         sound = args.sound[0]
     if args.path:
