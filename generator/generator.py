@@ -178,9 +178,9 @@ class Generator():
         misses = 0
         idx = 1
         while misses < 2:
-            r = requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode}.{idx}/{self.gamecode}.txt", timeout=15)
+            r = requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode}.{idx}/description.txt", timeout=15)
             if r.status_code != 200:
-                requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode[0:3]}.{idx}/{self.gamecode[0:3]}.txt", timeout=15)
+                requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode[0:3]}.{idx}/description.txt", timeout=15)
             if r.status_code == 200:
                 self.versions.append(r.text)
                 misses = 0
