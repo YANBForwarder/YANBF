@@ -228,21 +228,6 @@ class Generator():
                 self.sound = os.path.abspath("data/customsound.wav")
         return 0   
 
-    def checklocalassets(self):
-        if not self.boxart:
-            if os.path.isfile(f"assets/{self.gamecode}/{self.gamecode}.png"):
-                self.boxart = os.path.abspath(f"assets/{self.gamecode}/{self.gamecode}.png")
-                self.boxartcustom = True
-            elif os.path.isfile(f"assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.png"):
-                self.boxart = os.path.abspath(f"assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.png")
-                self.boxartcustom = True
-        if  not self.sound:
-            if os.path.isfile(f"assets/{self.gamecode}/{self.gamecode}.wav"):
-                self.sound = os.path.abspath(f"assets/{self.gamecode}/{self.gamecode}.wav")
-            elif os.path.isfile(f"assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.wav"):
-                self.sound = os.path.abspath(f"assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.wav")
-        return 0
-
     def downloadfromgithub(self):
         if not self.boxart:
             r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode}/{self.gamecode}.png", timeout=15)
@@ -308,27 +293,13 @@ class Generator():
         return 0
 
     def makebanner(self):
-        bannertoolarg = f'bannertool makebanner -i "{self.boxart}" -a "{self.sound}" -o "data/banner.bin"'
+        bannertoolarg = f'bannertool makebanner -i "data/banner.png" -a "{self.sound}" -o "data/banner.bin"'
         self.message(f"Using arguments: {bannertoolarg}")
         bannertoolrun = subprocess.run(f'{self.cmdarg}{bannertoolarg}', shell=True, capture_output=True, universal_newlines=True)
         if bannertoolrun.returncode != 0:
             self.message(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
             exit()
         return 0
-
-    def getdefaultrompath(self) -> str:
-        filename = os.path.basename(self.infile)
-        default_path: str = ""
-        try:
-            with open("default_path.txt") as f:
-                default_path = f.readline().strip("\n")
-        except IOError as e:
-            return  None
-
-        if default_path[-1] != "/":
-            default_path = default_path + "/"
-        rompath = default_path + filename
-        return rompath
 
     def getrompath(self, path) -> str:
         root: str = ""
@@ -374,7 +345,7 @@ class Generator():
         return 0
 
     def makecia(self):
-        makeromarg = f'{self.cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 6 -micro 3 -DAPP_VERSION_MAJOR=1 -o "output/{self.output}" '
+        makeromarg = f'{self.cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 6 -micro 3 -DAPP_VERSION_MAJOR=1 -o "{self.output}" '
         makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{self.gamecode} -DAPP_TITLE="{self.title["eng"][0]}" -DAPP_UNIQUE_ID={self.uniqueid}'
         self.message(f"Using arguments: {makeromarg}")
         makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
@@ -391,15 +362,12 @@ class Generator():
             self.message("Failed to open ROM. Is the path valid?")
             exit()
         if not self.path:
-            self.message('Custom path is not provided. Checking "default_path.txt".')
-            self.path = self.getdefaultrompath()
-            if not self.path:
-                self.message("No default path provided. Using path for input file.")
-                self.path = self.getrompath(os.path.abspath(self.infile))
+            self.message('Custom path is not provided. Using path for input file.')
+            self.path = self.getrompath(os.path.abspath(self.infile))
         if not self.output:
             self.output = f"{os.path.basename(self.infile)}.cia"
         self.message(f"Using ROM path: {self.path}")
-        self.message(f"Output file: output/{self.output}")
+        self.message(f"Output file: {self.output}")
         self.message("Getting gamecode...")
         self.getgamecode()
         self.message("Extracting and resizing icon...")
@@ -409,22 +377,19 @@ class Generator():
         self.message("Creating SMDH...")
         self.makesmdh()
         if not self.boxart or not self.sound:
-            self.message("Checking local files for a custom banner or sound...")
-            self.checklocalassets()
-            if not self.sound or not self.boxart:
-                self.message("Checking API if a custom banner or sound is provided...")
-                self.get_available_versions()
-                if len(self.versions) > 1:
-                  self.select_version()
-                  self.download_version_from_github(self.selected_version)
-                self.downloadfromgithub() #again if custom version only had banner or sound
-                if not self.sound:
-                    self.sound = os.path.abspath("data/dsboot.wav")
-                if not self.boxart:
-                    self.message("No banner provided. Checking GameTDB for standard boxart...")
-                    if self.downloadboxart() != 0:
-                        self.message("Banner was not found. Exiting.")
-                        exit()
+            self.message("Checking API if a custom banner or sound is provided...")
+            self.get_available_versions()
+            if len(self.versions) > 1:
+                self.select_version()
+                self.download_version_from_github(self.selected_version)
+            self.downloadfromgithub() #again if custom version only had banner or sound
+            if not self.sound:
+                self.sound = os.path.abspath("data/dsboot.wav")
+            if not self.boxart:
+                self.message("No banner provided. Checking GameTDB for standard boxart...")
+                if self.downloadboxart() != 0:
+                    self.message("Banner was not found. Exiting.")
+                    exit()
         self.message(f"Using sound file: {self.sound}")
         self.message(f"Using banner image: {self.boxart}")
         if not self.boxartcustom:
