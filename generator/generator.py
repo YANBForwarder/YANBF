@@ -304,7 +304,7 @@ class Generator():
         return 0
 
     def makecia(self):
-        makeromarg = f'{self.cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 6 -micro 3 -DAPP_VERSION_MAJOR=1 -o "output/{self.output}" '
+        makeromarg = f'{self.cmdarg}makerom -f cia -target t -exefslogo -rsf data/build-cia.rsf -elf data/forwarder.elf -banner data/banner.bin -icon data/output.smdh -DAPP_ROMFS=romfs -major 1 -minor 6 -micro 3 -DAPP_VERSION_MAJOR=1 -o "{self.output}" '
         makeromarg += f'-DAPP_PRODUCT_CODE=CTR-H-{self.gamecode} -DAPP_TITLE="{self.title["eng"][0]}" -DAPP_UNIQUE_ID={self.uniqueid}'
         self.message(f"Using arguments: {makeromarg}")
         makeromrun = subprocess.run(makeromarg, shell=True, capture_output=True, universal_newlines=True)
@@ -326,7 +326,7 @@ class Generator():
         if not self.output:
             self.output = f"{os.path.basename(self.infile)}.cia"
         self.message(f"Using ROM path: {self.path}")
-        self.message(f"Output file: output/{self.output}")
+        self.message(f"Output file: {self.output}")
         self.message("Getting gamecode...")
         self.getgamecode()
         self.message("Extracting and resizing icon...")
@@ -385,6 +385,8 @@ if __name__ == "__main__":
         infile = args.input[0]
     if args.output:
         output = args.output[0]
+    else:
+        output = f"output/{os.path.basename(args.input[0])}.cia" #should be safe since infile is required
     if args.sound:
         sound = args.sound[0]
     if args.path:
