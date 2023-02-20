@@ -260,6 +260,20 @@ class Generator():
             exit()
         return 0
 
+    def getdefaultrompath(self) -> str:
+        filename = os.path.basename(self.infile)
+        default_path: str = ""
+        try:
+            with open("default_path.txt") as f:
+                default_path = f.readline().strip("\n")
+        except IOError as e:
+            return  None
+
+        if default_path[-1] != "/":
+            default_path = default_path + "/"
+        rompath = default_path + filename
+        return rompath
+
     def getrompath(self, path) -> str:
         root: str = ""
         if os.name == 'nt':
@@ -321,8 +335,11 @@ class Generator():
             self.message("Failed to open ROM. Is the path valid?")
             exit()
         if not self.path:
-            self.message("Custom path is not provided. Using path for input file.")
-            self.path = self.getrompath(os.path.abspath(self.infile))
+            self.message('Custom path is not provided. Checking "default_path.txt".')
+            self.path = self.getdefaultrompath()
+            if not self.path:
+                self.message("No default path provided. Using path for input file.")
+                self.path = self.getrompath(os.path.abspath(self.infile))
         if not self.output:
             self.output = f"{os.path.basename(self.infile)}.cia"
         self.message(f"Using ROM path: {self.path}")
