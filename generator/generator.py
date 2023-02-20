@@ -178,9 +178,9 @@ class Generator():
         misses = 0
         idx = 1
         while misses < 2:
-            r = requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode}.{idx}/description.txt", timeout=15)
+            r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode}.{idx}/description.txt", timeout=15)
             if r.status_code != 200:
-                requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode[0:3]}.{idx}/description.txt", timeout=15)
+                r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode[0:3]}.{idx}/description.txt", timeout=15)
             if r.status_code == 200:
                 self.versions.append(r.text)
                 misses = 0
@@ -191,28 +191,28 @@ class Generator():
     def selectversion(self):
         self.message(f"Multiple versions found for {self.gamecode}")
         self.message("Please select one of the following:")
-        self.message("0 - Default")
         for i in range(0, len(self.versions)):
-            self.message(f"{i+1} - {self.versions[i]}")
+            self.message(f"{i} - {self.versions[i]}")
         inp = input("Selection: ")
-        if isnumeric(inp):
+        if inp.isnumeric():
             inp = int(inp)
-            if inp > 0 and inp < len(self.versions) + 1:
+            if inp >= 0 and inp < len(self.versions):
                 self.selected_version = inp
         else:
             self.message("Invalid selection, default version will be used.")
         return 0
 
 
-    def downloadfromgithub(self, version: str = None):
-        if not version:
-            version_name = ""
+    def downloadfromgithub(self, getversion: bool = False):
+        if not getversion:
+            version_id_str = ""
         else:
-            version_name = version + "/"
+            version_id_str = "." + str(self.selected_version)
+
         if not self.boxart:
-            r = requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode}/{version_name}{self.gamecode}.png", timeout=15)
+            r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode}{version_id_str}/{self.gamecode}.png", timeout=15)
             if r.status_code != 200:
-                r = requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode[0:3]}/{version_name}{self.gamecode[0:3]}.png", timeout=15)
+                r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode[0:3]}{version_id_str}/{self.gamecode[0:3]}.png", timeout=15)
             if r.status_code == 200:
                 f = open("data/banner.png", "wb")
                 f.write(r.content)
@@ -220,9 +220,9 @@ class Generator():
                 self.boxart = os.path.abspath("data/banner.png")
                 self.boxartcustom = True
         if not self.sound:
-            r = requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode}/{version_name}{self.gamecode}.wav", timeout=15)
+            r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode}{version_id_str}/{self.gamecode}.wav", timeout=15)
             if r.status_code != 200:
-                r = requests.get(f"https://github.com/pivotiiii/YANBF/tree/multiple_versions_romhacks/assets/{self.gamecode[0:3]}/{version_name}{self.gamecode[0:3]}.wav", timeout=15)
+                r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode[0:3]}{version_id_str}/{self.gamecode[0:3]}.wav", timeout=15)
             if r.status_code == 200:
                 f = open("data/customsound.wav", 'wb')
                 f.write(r.content)
