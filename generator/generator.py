@@ -38,6 +38,9 @@ class Generator():
     gamecode: str = None
     boxartcustom: bool = False
     uniqueid: int = None
+    versions: list = ["Default"]
+    version_codes: list = [("Default", "Default")]
+    selected_version = 0
 
     def message(self, output: str):
         """Outputting text. Defaults to print(). Can be replaced with other frontends (i.e. a GUI?)"""
@@ -172,11 +175,44 @@ class Generator():
         self.gamecode = code
         return 0
 
-    def downloadfromgithub(self):
+    def get_available_versions(self):
+        misses = 0
+        idx = 1
+        codes = [self.gamecode, self.gamecode[0:3]]
+
+        for code in [self.gamecode, self.gamecode[0:3]]:
+            misses = 0
+            while misses < 2:
+                r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{code}.{idx}/description.txt", timeout=15)
+                if r.status_code == 200:
+                    self.versions.append(f"{r.text} ({code}.{str(idx)})")
+                    self.version_codes.append((code, str(idx)))
+                    idx = idx + 1
+                    misses = 0
+                else:
+                    misses = misses + 1 #allow 1 miss so that a deleted ID.1 does not cause ID.2 to be missed as well
+
+    def select_version(self):
+        self.message(f"Multiple versions found for {self.gamecode}")
+        self.message("Please select one of the following:")
+        for i in range(0, len(self.versions)):
+            self.message(f"{i} - {self.versions[i]}")
+        inp = input("Selection: ")
+        if inp.isnumeric():
+            inp = int(inp)
+            if inp >= 0 and inp < len(self.versions):
+                self.selected_version = inp
+        else:
+            self.message("Invalid selection, default version will be used.")
+        return 0
+
+    def download_version_from_github(self, version_id: int):
+        if version_id == 0:
+            return
+        version_code = self.version_codes[version_id][0]
+        version_nr = self.version_codes[version_id][1]
         if not self.boxart:
-            r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode}/{self.gamecode}.png", timeout=15)
-            if r.status_code != 200:
-                r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.png", timeout=15)
+            r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{version_code}.{version_nr}/{version_code}.png", timeout=15)
             if r.status_code == 200:
                 f = open("data/banner.png", "wb")
                 f.write(r.content)
@@ -184,9 +220,29 @@ class Generator():
                 self.boxart = os.path.abspath("data/banner.png")
                 self.boxartcustom = True
         if not self.sound:
-            r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode}/{self.gamecode}.wav", timeout=15)
+            r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{version_code}.{version_nr}/{version_code}.wav", timeout=15)
+            if r.status_code == 200:
+                f = open("data/customsound.wav", 'wb')
+                f.write(r.content)
+                f.close()
+                self.sound = os.path.abspath("data/customsound.wav")
+        return 0   
+
+    def downloadfromgithub(self):
+        if not self.boxart:
+            r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode}/{self.gamecode}.png", timeout=15)
             if r.status_code != 200:
-                r = requests.get(f"https://raw.githubusercontent.com/YANBForwarder/assets/main/assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.wav", timeout=15)
+                r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.png", timeout=15)
+            if r.status_code == 200:
+                f = open("data/banner.png", "wb")
+                f.write(r.content)
+                f.close()
+                self.boxart = os.path.abspath("data/banner.png")
+                self.boxartcustom = True
+        if not self.sound:
+            r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode}/{self.gamecode}.wav", timeout=15)
+            if r.status_code != 200:
+                r = requests.get(f"https://raw.githubusercontent.com/pivotiiii/YANBF/multiple_versions_romhacks/assets/{self.gamecode[0:3]}/{self.gamecode[0:3]}.wav", timeout=15)
             if r.status_code == 200:
                 f = open("data/customsound.wav", 'wb')
                 f.write(r.content)
@@ -306,7 +362,7 @@ class Generator():
             self.message("Failed to open ROM. Is the path valid?")
             exit()
         if not self.path:
-            self.message("Custom path is not provided. Using path for input file.")
+            self.message('Custom path is not provided. Using path for input file.')
             self.path = self.getrompath(os.path.abspath(self.infile))
         if not self.output:
             self.output = f"{os.path.basename(self.infile)}.cia"
@@ -322,7 +378,11 @@ class Generator():
         self.makesmdh()
         if not self.boxart or not self.sound:
             self.message("Checking API if a custom banner or sound is provided...")
-            self.downloadfromgithub()
+            self.get_available_versions()
+            if len(self.versions) > 1:
+                self.select_version()
+                self.download_version_from_github(self.selected_version)
+            self.downloadfromgithub() #again if custom version only had banner or sound
             if not self.sound:
                 self.sound = os.path.abspath("data/dsboot.wav")
             if not self.boxart:
