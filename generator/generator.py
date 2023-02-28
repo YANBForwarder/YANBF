@@ -10,6 +10,7 @@ import os
 import requests
 import subprocess
 import unicodedata
+import shutil
 from struct import unpack
 from sys import exit, stdout
 from typing import Optional
@@ -17,11 +18,12 @@ from typing import Optional
 from PIL import Image
 
 from bannergif import bannergif, crc16
-
+from animate_banner import *
 
 class Generator():
     def __init__(self, infile: str, *, boxart: Optional[str], output: Optional[str], sound: Optional[str], path: Optional[str]):
         self.boxart = boxart
+        self.boxart2 = boxart
         self.infile = infile
         self.output = output
         self.sound = sound
@@ -237,14 +239,17 @@ class Generator():
         self.boxart = os.path.abspath("data/boxart.jpg")
         return 0
 
-    def resizebanner(self):
-        banner = Image.open(self.boxart)
+    def resizebanner(self, req_height = 128, req_width = 256, for_animate: bool = False):
+        if for_animate:
+            banner = Image.open(self.boxart2)
+        else:
+            banner = Image.open(self.boxart)
         width, height = banner.size
-        new_height = 128
+        new_height = req_height
         new_width = new_height * width // height
         banner = banner.resize((new_width, new_height), resample=Image.ANTIALIAS)
-        new_image = Image.new('RGBA', (256, 128), (0, 0, 0, 0))
-        upper = (256 - banner.size[0]) // 2
+        new_image = Image.new('RGBA', (req_width, req_height), (0, 0, 0, 0))
+        upper = (req_width - banner.size[0]) // 2
         new_image.paste(banner, (upper, 0))
         new_image.save('data/banner.png', 'PNG')
         self.boxart = os.path.abspath('data/banner.png')
@@ -259,6 +264,16 @@ class Generator():
             self.message(f"{bannertoolrun.stdout}\n{bannertoolrun.stderr}")
             exit()
         return 0
+    
+    def animatebanner(self):
+        self.resizebanner(256, 512, for_animate = True)
+        etc1_data = get_etc1a4_data_from_png({self.boxart}, "data/")
+        #os.makedirs("./data/temp", exist_ok = True)
+        subprocess.run(["3dstool", "-x", "-t", "banner", "-f", "data/banner.bin", "--banner-dir", "data/banner"])
+        shutil.copy2("./data/template.bcmdl", "./data/banner/banner0.bcmdl")
+        edit_bcmdl(etc1_data, "./data/banner/banner0.bcmdl")
+        subprocess.run(["3dstool", "-c", "-t", "banner", "-f", "data/banner.bin", "--banner-dir", "data/banner"])
+        
 
     def getrompath(self, path) -> str:
         root: str = ""
@@ -355,6 +370,7 @@ class Generator():
             self.resizebanner()
         self.message("Creating banner...")
         self.makebanner()
+        self.animatebanner()
         self.message("Creating romfs...")
         self.makeromfs()
         self.message("Generating UniqueID...")
