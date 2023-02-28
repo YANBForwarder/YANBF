@@ -239,21 +239,35 @@ class Generator():
         self.boxart = os.path.abspath("data/boxart.jpg")
         return 0
 
-    def resizebanner(self, req_height = 128, req_width = 256, for_animate: bool = False):
-        if for_animate:
-            banner = Image.open(self.boxart2)
-        else:
-            banner = Image.open(self.boxart)
+    def resizebanner(self):
+        banner = Image.open(self.boxart)
         width, height = banner.size
-        new_height = req_height
-        new_width = new_height * width // height
-        banner = banner.resize((new_width, new_height), resample=Image.ANTIALIAS)
-        new_image = Image.new('RGBA', (req_width, req_height), (0, 0, 0, 0))
-        upper = (req_width - banner.size[0]) // 2
-        new_image.paste(banner, (upper, 0))
+        if not width == 256 or height == 128:
+            new_height = 128
+            new_width = new_height * width // height
+            banner = banner.resize((new_width, new_height), resample=Image.ANTIALIAS)
+            new_image = Image.new('RGBA', (256, 128), (0, 0, 0, 0))
+            upper = (256 - banner.size[0]) // 2
+            new_image.paste(banner, (upper, 0))
+            new_image.save('data/banner.png', 'PNG')
+            self.boxart = os.path.abspath('data/banner.png')
+            self.message(f"Reformatted banner image: {self.boxart}")
+        return 0
+    
+    def resizebanner2(self):
+        banner = Image.open(self.boxart2)
+        width, height = banner.size
+        if width != 512 or height != 256: #regular assets or downloaded boxart
+            banner = banner.resize((150 * width // height, 150), resample=Image.ANTIALIAS) #dimensions fit safely into masked area of banner, roughly same size as static
+            upperleftcorner = (106, 53)
+        else:
+            upperleftcorner = (0, 0)
+        new_image = Image.new('RGBA', (512, 256), (0, 0, 0, 0))
+        new_image.paste(banner, upperleftcorner)
+        new_image = new_image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
         new_image.save('data/banner.png', 'PNG')
-        self.boxart = os.path.abspath('data/banner.png')
-        self.message(f"Reformatted banner image: {self.boxart}")
+        self.boxart2 = os.path.abspath('data/banner.png')
+        self.message(f"Reformatted banner image: {self.boxart2}")
         return 0
 
     def makebanner(self):
@@ -266,9 +280,8 @@ class Generator():
         return 0
     
     def animatebanner(self):
-        self.resizebanner(256, 512, for_animate = True)
-        etc1_data = get_etc1a4_data_from_png({self.boxart}, "data/")
-        #os.makedirs("./data/temp", exist_ok = True)
+        self.resizebanner2()
+        etc1_data = get_etc1a4_data_from_png(self.boxart2)
         subprocess.run(["3dstool", "-x", "-t", "banner", "-f", "data/banner.bin", "--banner-dir", "data/banner"])
         shutil.copy2("./data/template.bcmdl", "./data/banner/banner0.bcmdl")
         edit_bcmdl(etc1_data, "./data/banner/banner0.bcmdl")
@@ -365,11 +378,13 @@ class Generator():
                         exit()
         self.message(f"Using sound file: {self.sound}")
         self.message(f"Using banner image: {self.boxart}")
-        if not self.boxartcustom:
-            self.message("Resizing banner...")
-            self.resizebanner()
+        self.boxart2 = self.boxart
+        #if not self.boxartcustom:
+        self.message("Resizing banner...")
+        self.resizebanner()
         self.message("Creating banner...")
         self.makebanner()
+        self.message("Animating banner...")
         self.animatebanner()
         self.message("Creating romfs...")
         self.makeromfs()
