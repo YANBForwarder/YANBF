@@ -14,6 +14,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 
+#[repr(C, packed)]
 struct sNDSHeaderExt {
 	gameTitle: [u8; 12],		// 12 characters for the game title.
 	gameCode: [u8; 4],			// 4 characters for the game code.
@@ -118,6 +119,7 @@ struct sNDSHeaderExt {
 	dsi3: [u8; 0x174]
 }
 
+#[repr(C, packed)]
 struct sNDSBannerExt {
 	version: u16,		        // version of the banner.
 	crc: [u16; 4],		        // CRC-16s of the banner.
