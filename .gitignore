@@ -11,6 +11,8 @@
 *.exe
 *.zip
 *.bin
+*.lock
+target
 __pycache__
 dist
 build
