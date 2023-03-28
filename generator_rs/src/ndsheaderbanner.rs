@@ -11,6 +11,9 @@
 
 ---------------------------------------------------------------------------------*/
 
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
+
 struct sNDSHeaderExt {
 	gameTitle: [u8; 12],		// 12 characters for the game title.
 	gameCode: [u8; 4],			// 4 characters for the game code.
