@@ -27,6 +27,7 @@ class Forwarder {
         std::vector<std::string> tidlow;
         sNDSHeaderExt* header;
         sNDSBannerExt* banner;
+        unsigned char* cgfx_banner_input;
     public:
         fs::path ROMpath;
 

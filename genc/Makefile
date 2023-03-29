@@ -4,7 +4,11 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 
 TARGET := generator
 
-SOURCES		+= source
+SOURCES		+= 	source \
+				source/ext \
+				source/bannertool \
+				source/bannertool/3ds \
+				source/bannertool/pc
 INCLUDES	+= 
 
 #--- set toolchain name

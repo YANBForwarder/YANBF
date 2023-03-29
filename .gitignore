@@ -20,5 +20,6 @@ generator/id.txt
 generator/output
 generator/data/customsound.wav
 bannertool*
+!genc/source/bannertool
 makerom*
 venv

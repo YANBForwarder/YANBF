@@ -82,3 +82,8 @@ bool Forwarder::gettitle() {
 bool Forwarder::geticon() {
     return bannerpng(banner, "data/output.png");
 }
+
+bool Forwarder::getBannerImage() {
+    cgfx_banner_input = convertBanner();
+    return true;
+}

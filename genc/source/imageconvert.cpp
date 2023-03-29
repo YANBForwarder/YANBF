@@ -16,10 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <cstdio>
 #include <string>
 
 #include "ext/JustInterp.h"
-#include "ext/lodepng.h"
+#include "ext/stb_image.h"
 #include "ext/ujpeg.h"
 
 void bilinearResize(float *data, uint32_t input_width,
@@ -64,7 +65,7 @@ void bilinearResize(float *data, uint32_t input_width,
     }
 }
 
-void convertBanner(std::string srcpath, std::string dstpath) {
+unsigned char* convertBanner(std::string srcpath, std::string dstpath) {
 	// output image size
 	int outWidth = 256;
 	int outHeight = 128;
@@ -74,13 +75,16 @@ void convertBanner(std::string srcpath, std::string dstpath) {
 	if(srcpath.substr(srcpath.size() - 3).find("jpg") != std::string::npos) {
 		uJPEG ujpeg();
 		ujpeg.decodeFile(srcpath.c_str());
-		input = malloc(ujpeg.getImageSize());
 		inWidth = ujpeg.getWidth();
 		inHeight = ujpeg.getHeight();
 		ujpeg.getImage(&input);
 	} else if(srcpath.substr(srcpath.size() - 3).find("png") != std::string::npos) {
-		lodepng_decode32_file(input, &inWidth, &inHeight, srcpath.c_str());
+		input = stbi_load(srcpath.c_str(), &inWidth, &inHeight, STBI_rgb_alpha);
 	}
+    if (input == NULL) {
+        printf("ERROR: Could not load image file: %s.\n", stbi_failure_reason());
+        return;
+    }
 	// calculate what to scale to while preserving aspect ratio
 	float scale = min((float)outWidth / inWidth, (float)outHeight / inHeight);
 	// alloc a buffer that can fit that
@@ -100,6 +104,5 @@ void convertBanner(std::string srcpath, std::string dstpath) {
 	free(buffer);
 
 	// encode png
-	lodepng_encode32_file(filename, image, width, height);
-	free(image);
+	return image;
 }
