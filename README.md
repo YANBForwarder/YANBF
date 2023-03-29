@@ -106,9 +106,6 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
     bannerpng.c
     Copyright (C) 2021 Pk11
 
-    json.hpp
-    Copyright (c) 2013-2022 Niels Lohmann <http://nlohmann.me>.
-
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
     in the Software without restriction, including without limitation the rights

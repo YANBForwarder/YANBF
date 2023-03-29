@@ -21,7 +21,6 @@
 #include <filesystem>
 #include <unistd.h>
 
-#include "json.hpp"
 #include "argparse.hpp"
 #include "bannerpng.h"
 #include "core.hpp"
