@@ -20,13 +20,13 @@
  * THE SOFTWARE.
  */
 
-#include "lodepng.h"
-#include "ndsheaderbanner.h"
-
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+
+#include "ext/lodepng.h"
+#include "ndsheaderbanner.h"
 
 /**
  * @param input path to the DS ROM

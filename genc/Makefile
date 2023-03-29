@@ -57,7 +57,7 @@ CFLAGS	:=	-Wall -Wno-parentheses \
 #-DNO_VIZ for zlib.
 
 CFLAGS	+=	$(INCLUDE)
-CXXFLAGS	:=	$(CFLAGS) -std=gnu++17
+CXXFLAGS	:=	$(CFLAGS) -std=c++17
 #lovely hack...
 #bah -Wno-pointer-sign must be stripped for iPodLinux
 # CFLAGS	+=  -Wno-pointer-sign -std=gnu99

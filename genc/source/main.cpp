@@ -21,9 +21,9 @@
 #include <filesystem>
 #include <unistd.h>
 
-#include "argparse.hpp"
+#include "ext/argparse.hpp"
 #include "bannerpng.h"
-#include "core.hpp"
+#include "forwarder.hpp"
 
 #define APPVERSION "1.5.0"
 
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     parser.add_argument("-b", "--boxart").help("Custom boxart path");
     parser.add_argument("-s", "--sound").help("Custom icon sound path");
     parser.add_argument("-r", "--randomize").help("Randomize UniqueID").default_value(false).implicit_value(true);
-    try{
+    try {
         parser.parse_args(argc, argv);
     } catch(const std::runtime_error& err) {
         std::cerr << err.what() << std::endl;

@@ -83,7 +83,7 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
 ```
     TWL-NAND bootstrap
     Copyright (C) 2010 Dave "WinterMute" Murphy
-    
+
     YANBF
     Copyright (C) 2022 lifehackerhansol
 
@@ -105,6 +105,12 @@ YANBF (Yet Another nds-bootstrap Forwarder) is a forwarder structure for nds-boo
 ```
     bannerpng.c
     Copyright (C) 2021 Pk11
+
+    ArgParse
+    Copyright (c) 2019-2021 Pranav Srinivas Kumar <pranav.srinivas.kumar@gmail.com> and other contributors.
+
+    uJPEG (MicroJPEG) -- KeyJ's Small Baseline JPEG Decoder
+    Copyright (c) 2009-2016 Martin J. Fiedler <martin.fiedler@gmx.net>
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal

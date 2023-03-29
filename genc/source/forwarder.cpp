@@ -27,6 +27,7 @@
 
 #include "bannerpng.h"
 #include "core.hpp"
+#include "imageconvert.hpp"
 
 namespace fs = std::filesystem;
 
