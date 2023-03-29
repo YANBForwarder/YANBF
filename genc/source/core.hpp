@@ -36,9 +36,11 @@ class Forwarder {
             free(header);
             free(banner);
         }
+        
+        // funny debugging
+        std::string getroot();
 
         bool collisioncheck();
         bool gettitle();
         bool geticon();
-        bool resizeicon();
 };

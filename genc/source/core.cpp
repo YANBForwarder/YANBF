@@ -22,9 +22,8 @@
 #include <string>
 #include <vector>
 #include <filesystem>
-#include <unistd.h>
 
-#include <Magick++.h>
+#include <unistd.h>
 
 #include "bannerpng.h"
 #include "core.hpp"
@@ -37,6 +36,11 @@ Forwarder::Forwarder(const std::string path){
     root = ROMpath.root_path().string();
     header = (sNDSHeaderExt*)malloc(sizeof(sNDSHeaderExt));
     banner = (sNDSBannerExt*)malloc(sizeof(sNDSBannerExt));
+}
+
+// funny debugging
+std::string Forwarder::getroot() {
+    return root;
 }
 
 bool Forwarder::collisioncheck() {
@@ -76,11 +80,4 @@ bool Forwarder::gettitle() {
 
 bool Forwarder::geticon() {
     return bannerpng(banner, "data/output.png");
-}
-
-bool Forwarder::resizeicon() {
-    Magick::Image icon("data/output.png");
-    icon.resize("48x48");
-    icon.write("data/output2.png");
-    return true;
 }

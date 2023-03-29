@@ -28,10 +28,10 @@ export STRIP	:=	$(PREFIX)strip
 #--- set path
 ### relative path from build
 ifeq ($(OS),Windows_NT)
-LIBS	+=	-Wl,-Bstatic -lMagick++-7.Q16HDRI -lMagickCore-7.Q16HDRI -lMagickWand-7.Q16HDRI
+LIBS	+=	-Wl,-Bstatic
 LIBDIRS	:= /lib
 else
-LIBS	+= -Wl,-Bstatic -lMagick++-7.Q16HDRI -lMagickCore-7.Q16HDRI -lMagickWand-7.Q16HDRI -Wl,-Bdynamic -ldl
+LIBS	+= -Wl,-Bstatic -Wl,-Bdynamic -ldl
 LIBDIRS	:= libs
 endif
 export LIBS
@@ -57,7 +57,7 @@ CFLAGS	:=	-Wall -Wno-parentheses \
 #-DNO_VIZ for zlib.
 
 CFLAGS	+=	$(INCLUDE)
-CXXFLAGS	:=	`Magick++-config --cppflags --cxxflags` $(CFLAGS) -std=gnu++17 `Magick++-config --ldflags --libs`
+CXXFLAGS	:=	$(CFLAGS) -std=gnu++17
 #lovely hack...
 #bah -Wno-pointer-sign must be stripped for iPodLinux
 # CFLAGS	+=  -Wno-pointer-sign -std=gnu99
@@ -105,7 +105,6 @@ export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
 .PHONY: $(BUILD) clean
  
 $(BUILD):
-	
 	@[ -d $@ ] || mkdir -p $@
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile -j8
 

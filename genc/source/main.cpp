@@ -20,7 +20,6 @@
 #include <string>
 #include <filesystem>
 #include <unistd.h>
-#include <Magick++.h>
 
 #include "json.hpp"
 #include "argparse.hpp"
@@ -47,7 +46,6 @@ int main(int argc, char** argv) {
         std::cerr << parser;
         return 1;
     }
-    Magick::InitializeMagick(*argv);
     Forwarder forwarder(parser.get<std::string>("input"));
 
     try {
@@ -61,6 +59,5 @@ int main(int argc, char** argv) {
         std::cerr << "Failed to save icon." << std::endl;
         return 1;
     };
-    forwarder.resizeicon();
     return 0;
 }
