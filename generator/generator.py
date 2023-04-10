@@ -258,13 +258,12 @@ class Generator():
         banner = Image.open(self.boxart2)
         width, height = banner.size
         if width != 512 or height != 256: #regular assets or downloaded boxart
-            banner = banner.resize((150 * width // height, 150), resample=Image.ANTIALIAS) #dimensions fit safely into masked area of banner, roughly same size as static
+            banner = banner.resize((150 * width // height, 150), resample=Image.LANCZOS) #dimensions fit safely into masked area of banner, roughly same size as static
             upperleftcorner = (106, 53)
         else:
             upperleftcorner = (0, 0)
         new_image = Image.new('RGBA', (512, 256), (0, 0, 0, 0))
         new_image.paste(banner, upperleftcorner)
-        new_image = new_image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
         new_image.save('data/banner.png', 'PNG')
         self.boxart2 = os.path.abspath('data/banner.png')
         self.message(f"Reformatted banner image: {self.boxart2}")

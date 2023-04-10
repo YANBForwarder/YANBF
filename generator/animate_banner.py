@@ -9,12 +9,13 @@ def printb(title, bytes):
     print(f"{title} = {bytes} = {uint(bytes)}")
 
 def convert_png_to_etc1a4(png_path, out_dir = "data/"): #dir has to end with a separator
-    print(f"Using arguments: 3dstex-win-x86.exe -r -o auto-etc1 {png_path} {out_dir}etc1.bin")
-    subprocess.run(["3dstex-win-x86.exe", "-r", "-o", "auto-etc1", png_path, f"{out_dir}etc1.bin"])
+    print(f"Using arguments: tex3ds.exe -r -f etc1a4 -z none -o {out_dir}etc1.bin {png_path}")
+    subprocess.run(["tex3ds.exe", "-r", "-f", "etc1a4", "-z", "none", "-o", f"{out_dir}etc1.bin", png_path])
 
 def get_etc1a4_data_from_png(png_path, out_dir = "data/"): #dir has to end with a separator
     convert_png_to_etc1a4(png_path, out_dir)
     with open(f"{out_dir}etc1.bin", "r+b") as f:
+        f.seek(4, 0) #tex3ds includes a header even if -r arg is passed
         data = f.read()
     return data
 
