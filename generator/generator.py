@@ -18,16 +18,16 @@ from typing import Optional
 from PIL import Image
 
 from bannergif import bannergif, crc16
-from animate_banner import *
 
 class Generator():
-    def __init__(self, infile: str, *, boxart: Optional[str], output: Optional[str], sound: Optional[str], path: Optional[str]):
+    def __init__(self, infile: str, *, boxart: Optional[str], output: Optional[str], sound: Optional[str], path: Optional[str], static: Optional[bool]):
         self.boxart = boxart
-        self.boxart2 = boxart
+        self.boxart_animation = boxart
         self.infile = infile
         self.output = output
         self.sound = sound
         self.path = path
+        self.static = static
         self.cmdarg = ""
         if os.name != "nt":
             self.cmdarg = "./"
@@ -49,7 +49,7 @@ class Generator():
         im = bannergif(self.infile)
         im.putpalette(b"\xFF\xFF\xFF" + im.palette.palette[3:])
         im = im.convert('RGB')
-        im = im.resize((48, 48), resample=Image.LINEAR)
+        im = im.resize((48, 48), resample=Image.BILINEAR)
         im.save('data/icon.png')
         return 0
 
@@ -239,13 +239,15 @@ class Generator():
         self.boxart = os.path.abspath("data/boxart.jpg")
         return 0
 
-    def resizebanner(self):
+    def resizebanner_static(self):
         banner = Image.open(self.boxart)
         width, height = banner.size
+        if width == 512 and height == 256:              #assume assets of this size are for animation
+            banner = banner.crop((51, 27, 459, 231))    #otherwise the static banners are too small due to the mask necessary for animations
         if not width == 256 or height == 128:
             new_height = 128
             new_width = new_height * width // height
-            banner = banner.resize((new_width, new_height), resample=Image.ANTIALIAS)
+            banner = banner.resize((new_width, new_height), resample=Image.LANCZOS)
             new_image = Image.new('RGBA', (256, 128), (0, 0, 0, 0))
             upper = (256 - banner.size[0]) // 2
             new_image.paste(banner, (upper, 0))
@@ -254,8 +256,8 @@ class Generator():
             self.message(f"Reformatted banner image: {self.boxart}")
         return 0
     
-    def resizebanner2(self):
-        banner = Image.open(self.boxart2)
+    def resizebanner_animation(self):
+        banner = Image.open(self.boxart_animation)
         width, height = banner.size
         if width != 512 or height != 256: #regular assets or downloaded boxart
             banner = banner.resize((150 * width // height, 150), resample=Image.LANCZOS) #dimensions fit safely into masked area of banner, roughly same size as static
@@ -265,8 +267,8 @@ class Generator():
         new_image = Image.new('RGBA', (512, 256), (0, 0, 0, 0))
         new_image.paste(banner, upperleftcorner)
         new_image.save('data/banner.png', 'PNG')
-        self.boxart2 = os.path.abspath('data/banner.png')
-        self.message(f"Reformatted banner image: {self.boxart2}")
+        self.boxart_animation = os.path.abspath('data/banner.png')
+        self.message(f"Reformatted banner image: {self.boxart_animation}")
         return 0
 
     def makebanner(self):
@@ -279,14 +281,56 @@ class Generator():
         return 0
     
     def animatebanner(self):
-        self.resizebanner2()
-        etc1_data = get_etc1a4_data_from_png(self.boxart2)
+        self.resizebanner_animation()
         subprocess.run(["3dstool", "-x", "-t", "banner", "-f", "data/banner.bin", "--banner-dir", "data/banner"])
         shutil.copy2("./data/template.bcmdl", "./data/banner/banner0.bcmdl")
-        edit_bcmdl(etc1_data, "./data/banner/banner0.bcmdl")
+        self.edit_bcmdl()
         subprocess.run(["3dstool", "-c", "-t", "banner", "-f", "data/banner.bin", "--banner-dir", "data/banner"])
-        
 
+    def get_etc1a4_data_from_png(self, png_path):
+        subprocess.run(["tex3ds.exe", "-r", "-f", "etc1a4", "-z", "none", "-o", f"data/etc1.bin", png_path])
+        with open("data/etc1.bin", "r+b") as f:
+            f.seek(4, 0) #tex3ds includes a header even if -r arg is passed
+            data = f.read()
+        return data
+
+    def edit_bcmdl(self, bcmdl_path = "./data/banner/banner0.bcmdl"):
+        uint = lambda b : int.from_bytes(b, "little", signed=False)
+        etc1_data = self.get_etc1a4_data_from_png(self.boxart_animation)
+        with open(bcmdl_path, "rb+") as f:
+            f.seek(4 + 2 + 2 + 4, 0)
+            pFileSizeBytes = f.tell()
+            uiFileSizeBytes = uint(f.read(4))
+            f.seek(4 + 4 + 4, 1)
+            #DATA
+            dictList = []
+            for i in range(0, 15):
+                dictList.append((f.read(4), f.tell() + uint(f.read(4))))
+            f.seek(dictList[1][1], 0)
+            #DICT1
+            f.seek(4 + 4 + 4 + 4 + 2 + 0xA + 4 + 2 + 2 + 4, 1)
+            uiObjectOffsetDict1 = f.tell() + uint(f.read(4))
+            #TXOB
+            f.seek(uiObjectOffsetDict1 + 0x44, 0)
+            pTxobTextureDataSize = f.tell()
+            uiTxobTextureDataSize = uint(f.read(4))
+            f.seek(uiObjectOffsetDict1 + 0x48, 0)
+            pTxobTextureDataOffset = f.tell() + uint(f.read(4))
+            #TXOB DATA
+            f.seek(pTxobTextureDataOffset, 0)
+            f.write(etc1_data)
+            #update sizes
+            uiNewTxobSize = len(etc1_data)
+            bNewTxobSize = uiNewTxobSize.to_bytes(4, "little")
+            uiNewTotalSize = uiFileSizeBytes - uiTxobTextureDataSize + uiNewTxobSize
+            bNewTotalSize = uiNewTotalSize.to_bytes(4, "little")
+            #write new texture size to txob offset
+            f.seek(pTxobTextureDataSize, 0)
+            f.write(bNewTxobSize)
+            #write new file size in header
+            f.seek(pFileSizeBytes, 0)
+            f.write(bNewTotalSize)
+        
     def getrompath(self, path) -> str:
         root: str = ""
         if os.name == 'nt':
@@ -377,14 +421,14 @@ class Generator():
                         exit()
         self.message(f"Using sound file: {self.sound}")
         self.message(f"Using banner image: {self.boxart}")
-        self.boxart2 = self.boxart
-        #if not self.boxartcustom:
+        self.boxart_animation = self.boxart
         self.message("Resizing banner...")
-        self.resizebanner()
+        self.resizebanner_static()
         self.message("Creating banner...")
         self.makebanner()
-        self.message("Animating banner...")
-        self.animatebanner()
+        if not self.static:
+            self.message("Animating banner...")
+            self.animatebanner()
         self.message("Creating romfs...")
         self.makeromfs()
         self.message("Generating UniqueID...")
@@ -401,6 +445,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", metavar="input.nds.cia", type=str, nargs=1, help="output CIA")
     parser.add_argument("-b", "--boxart", metavar="boxart.png", type=str, nargs=1, help="Custom banner box art")
     parser.add_argument("-s", "--sound", metavar="sound.wav", type=str, nargs=1, help="Custom icon sound (WAV only)")
+    parser.add_argument("--static", default=False, action="store_true", help="Create a static banner")
 
     args = parser.parse_args()
     infile = None
@@ -408,6 +453,7 @@ if __name__ == "__main__":
     boxart = None
     output = None
     sound = None
+    static = False
     tidlow = None
     if args.boxart:
         boxart = args.boxart[0]
@@ -421,7 +467,10 @@ if __name__ == "__main__":
         sound = args.sound[0]
     if args.path:
         path = args.path[0]
+    if args.static:
+        static = args.static
+    
 
-    generator = Generator(infile, boxart=boxart, output=output, sound=sound, path=path)
+    generator = Generator(infile, boxart=boxart, output=output, sound=sound, path=path, static=static)
     generator.start()
     exit()
