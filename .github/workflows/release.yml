@@ -73,7 +73,7 @@ jobs:
           name: YANBF-Windows
 
   macos:
-    runs-on: macos-10.15
+    runs-on: macos-11
     name: Build macOS
     if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
     needs: generator
