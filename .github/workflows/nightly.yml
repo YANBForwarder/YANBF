@@ -55,6 +55,11 @@ jobs:
           python -m pip install cx-Freeze
       - name: Create package
         run: |
+          curl -LJO "https://github.com/dnasdw/3dstool/releases/download/v1.2.6/3dstool.zip"
+          unzip 3dstool.zip
+          mv -f 3dstool.exe ext_key.txt ignore_3dstool.txt YANBF/generator
+          curl -LJO "https://github.com/YANBForwarder/tex3ds/releases/download/v2.3.0/tex3ds.exe"
+          mv -f tex3ds.exe YANBF/generator/tex3ds.exe
           curl -LJO "https://github.com/Epicpkmn11/bannertool/releases/latest/download/bannertool.zip"
           unzip bannertool.zip
           mv -f windows-x86_64/bannertool.exe YANBF/generator/bannertool.exe
@@ -89,6 +94,11 @@ jobs:
           python3 -m pip install pyinstaller
       - name: Create package
         run: |
+          wget https://github.com/dnasdw/3dstool/releases/download/v1.2.6/3dstool_macos_x86_64.tar.gz
+          tar xvzf 3dstool_macos_x86_64.tar.gz
+          mv -f 3dstool ext_key.txt ignore_3dstool.txt YANBF/generator
+          wget https://github.com/YANBForwarder/tex3ds/releases/download/v2.3.0/tex3ds-macos-universal
+          mv -f tex3ds-macos-universal YANBF/generator/tex3ds
           wget "https://github.com/Epicpkmn11/bannertool/releases/latest/download/bannertool.zip"
           unzip bannertool.zip
           cp mac-x86_64/bannertool YANBF/generator/bannertool
@@ -101,7 +111,7 @@ jobs:
           rm -rf *.py build generator.spec __pycache__ dist requirements.txt
       - name: chmod packages, and double zip because screw GitHub
         run: |
-          chmod +x YANBF/generator/generator YANBF/generator/makerom YANBF/generator/bannertool
+          chmod +x YANBF/generator/generator YANBF/generator/makerom YANBF/generator/bannertool YANBF/generator/tex3ds YANBF/generator/3dstool
           mkdir actions
           cd YANBF
           zip -r ../actions/YANBF-macOS.zip *
@@ -114,6 +124,7 @@ jobs:
   linux:
     runs-on: ubuntu-20.04
     name: Build Linux
+    container: devkitpro/devkitarm
     if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
     needs: generator
     steps:
@@ -128,6 +139,10 @@ jobs:
           pip3 install pyinstaller
       - name: Create package
         run: |
+          sudo cp /opt/devkitpro/tools/bin/tex3ds YANBF/generator/tex3ds
+          wget https://github.com/dnasdw/3dstool/releases/download/v1.2.6/3dstool_linux_x86_64.tar.gz
+          tar xvzf 3dstool_linux_x86_64.tar.gz
+          mv -f 3dstool ext_key.txt ignore_3dstool.txt YANBF/generator
           wget "https://github.com/Epicpkmn11/bannertool/releases/latest/download/bannertool.zip"
           unzip bannertool.zip
           cp linux-x86_64/bannertool YANBF/generator/bannertool
@@ -140,7 +155,7 @@ jobs:
           rm -rf *.py build generator.spec __pycache__ dist requirements.txt
       - name: chmod packages, and double zip because screw GitHub
         run: |
-          chmod +x YANBF/generator/generator YANBF/generator/makerom YANBF/generator/bannertool
+          chmod +x YANBF/generator/generator YANBF/generator/makerom YANBF/generator/bannertool YANBF/generator/tex3ds YANBF/generator/3dstool
           mkdir actions
           cd YANBF
           zip -r ../actions/YANBF-Linux.zip *
