@@ -28,7 +28,6 @@ SOFTWARE.
 
 int main() {
 	romfsInit();
-	nsInit();
 	amInit();
 	mkdir("sdmc:/_nds", 0777);
 	mkdir("sdmc:/_nds/ntr-forwarder", 0777);
@@ -48,11 +47,14 @@ int main() {
 	AM_TitleEntry bootstrap;
 	u64 tid = 0x0004800546574452;
 	if(R_SUCCEEDED(AM_GetTitleInfo(MEDIATYPE_NAND, 1, &tid, &bootstrap))) {
-		NS_RebootToTitle(MEDIATYPE_NAND, tid);
+		if(R_SUCCEEDED(APT_PrepareToDoApplicationJump(0, 0x0004800546574452, 0))) {
+			u8 param[0x300];
+			u8 hmac[0x20];
+			APT_DoApplicationJump(param, sizeof(param), hmac);
+		}
 	}
 
 	gfxInitDefault();
-	for(u32 i = 0; i < 60; i++) gspWaitForVBlank();
 	consoleInit(GFX_TOP, NULL);
 	printf("Failed to launch CIA.\n\nPlease reinstall bootstrap.cia from\nYANBF release.\n\nPress START to exit.");
 	while (aptMainLoop()) {
@@ -63,8 +65,6 @@ int main() {
 
 		if (hidKeysDown() & KEY_START) break;
 	}
-	romfsExit();
-	nsExit();
 	amExit();
 	gfxExit();
 	return 0;
