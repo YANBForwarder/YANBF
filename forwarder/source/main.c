@@ -44,28 +44,32 @@ int main() {
 		}
 	}
 	fclose(file);
+
+	Result ret = 0;
 	AM_TitleEntry bootstrap;
 	u64 tid = 0x0004800546574452;
-	if(R_SUCCEEDED(AM_GetTitleInfo(MEDIATYPE_NAND, 1, &tid, &bootstrap))) {
-		if(R_SUCCEEDED(APT_PrepareToDoApplicationJump(0, 0x0004800546574452, 0))) {
+	if(ret = AM_GetTitleInfo(MEDIATYPE_NAND, 1, &tid, &bootstrap), R_SUCCEEDED(ret)) {
+		if(ret = APT_PrepareToDoApplicationJump(0, tid, 0), R_SUCCEEDED(ret)) {
 			u8 param[0x300];
 			u8 hmac[0x20];
-			APT_DoApplicationJump(param, sizeof(param), hmac);
+			ret = APT_DoApplicationJump(param, sizeof(param), hmac);
 		}
 	}
+	if(R_FAILED(ret)) {
+		gfxInitDefault();
+		consoleInit(GFX_TOP, NULL);
+		printf("Failed to launch CIA.\n\nPlease reinstall bootstrap.cia from\nYANBF release.\n\nPress START to exit.");
+		while (aptMainLoop()) {
+			gfxFlushBuffers();
+			gfxSwapBuffers();
+			gspWaitForVBlank();
+			hidScanInput();
 
-	gfxInitDefault();
-	consoleInit(GFX_TOP, NULL);
-	printf("Failed to launch CIA.\n\nPlease reinstall bootstrap.cia from\nYANBF release.\n\nPress START to exit.");
-	while (aptMainLoop()) {
-		gfxFlushBuffers();
-		gfxSwapBuffers();
-		gspWaitForVBlank();
-		hidScanInput();
-
-		if (hidKeysDown() & KEY_START) break;
+			if (hidKeysDown() & KEY_START) break;
+		}
+		gfxExit();
 	}
+
 	amExit();
-	gfxExit();
 	return 0;
 }
