@@ -132,6 +132,7 @@ jobs:
           path: YANBF
       - name: Install dependencies
         run: |
+          sudo apt install -y python3-pip
           pip3 install -r YANBF/generator/requirements.txt
           pip3 install pyinstaller
       - name: Create package
